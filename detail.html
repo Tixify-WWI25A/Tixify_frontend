@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tixify – Details</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__container">
+        <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-menu__link">Event-Suche</a>
+          <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
+          <a href="login.html" class="nav-menu__link">Login / Registrieren</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-container">
+      <div class="grid-two-columns">
+        <div>
+          <div
+            id="event-art"
+            class="media-placeholder"
+            data-art="Konzerte"
+            style="height: 280px; margin-bottom: 16px"
+          ></div>
+          <h1 id="event-title">Event wird geladen...</h1>
+          <div class="text-muted" id="event-meta">...</div>
+          <div style="margin: 10px 0">
+            <span class="badge" id="event-category">-</span>
+          </div>
+
+          <h2 style="margin-top: 18px">Beschreibung</h2>
+          <p id="event-description" style="max-width: 62ch">
+            Lade Beschreibung...
+          </p>
+
+          <h2>Veranstaltungsort</h2>
+          <div
+            class="media-placeholder"
+            data-art="map"
+            style="height: 140px"
+          ></div>
+        </div>
+
+        <aside
+          class="card-box"
+          style="align-self: start; position: sticky; top: 12px"
+        >
+          <h2>Tickets</h2>
+          <div class="summary-row">
+            <span>Preis pro Ticket</span><b id="ticket-price">0,00 €</b>
+          </div>
+          <div class="summary-row">
+            <span>Verfügbar</span><b id="ticket-stock">0 Tickets</b>
+          </div>
+
+          <div class="text-muted" style="margin-top: 10px">Anzahl</div>
+          <div class="quantity-control">
+            <button type="button" id="btn-decrease">−</button>
+            <span id="ticket-quantity">1</span>
+            <button type="button" id="btn-increase">+</button>
+          </div>
+
+          <div class="summary-row summary-row--total">
+            <span>Gesamt</span><span id="total-price">0,00 €</span>
+          </div>
+
+          <button
+            type="button"
+            id="btn-checkout"
+            class="button button--full"
+            style="margin-top: 12px"
+          >
+            Weiter zur Zahlung
+          </button>
+          <div class="text-muted" style="margin-top: 8px">
+            Für den Kauf ist ein Login erforderlich.
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script type="module" src="js/common.js"></script>
+    <script type="module" src="js/detail.js"></script>
+  </body>
+</html>
