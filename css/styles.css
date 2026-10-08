@@ -361,3 +361,89 @@ h3 {
   font-size: 18px;
   display: block;
 }
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 6px 0 12px;
+}
+
+.quantity-control button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.quantity-control span {
+  width: 50px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-left: 0;
+  border-right: 0;
+  background: var(--color-surface);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.summary-row--total {
+  border-top: 1px solid var(--color-border);
+  margin-top: 6px;
+  padding-top: 10px;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.checkout-steps {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+
+.checkout-steps__step {
+  flex: 1;
+  padding: 8px 10px;
+  border-bottom: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.checkout-steps__step--active {
+  border-color: var(--color-accent);
+  color: var(--color-text-main);
+  font-weight: 600;
+}
+
+.ticket-item {
+  display: flex;
+  border: 1px dashed var(--color-accent);
+  border-radius: 4px;
+  background: var(--color-surface);
+  margin-bottom: 10px;
+}
+
+.ticket-item__qr {
+  width: 90px;
+  border: 0;
+  border-right: 1px dashed var(--color-accent);
+  border-radius: 0;
+}
+
+.ticket-item__details {
+  padding: 10px 14px;
+}
+
+.order-status--paid {
+  color: var(--color-success);
+  font-weight: 600;
+}
