@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tixify – Events</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__container">
+        <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
+        <div class="search-bar">
+          <input
+            id="search-input"
+            class="search-bar__input"
+            placeholder="Event, Künstler oder Ort suchen"
+          />
+          <button class="button">Suchen</button>
+        </div>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-menu__link nav-menu__link--active"
+            >Event-Suche</a
+          >
+          <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
+          <a href="admin.html" class="nav-menu__link">Eventverwaltung</a>
+          <a href="login.html" class="nav-menu__link">Login / Registrieren</a>
+        </nav>
+      </div>
+
+      <div class="category-bar">
+        <a class="category-bar__link category-bar__link--active">Alle</a>
+        <a class="category-bar__link">Konzerte</a>
+        <a class="category-bar__link">Sport</a>
+        <a class="category-bar__link">Theater</a>
+        <a class="category-bar__link">Comedy</a>
+        <a class="category-bar__link">Festivals</a>
+      </div>
+    </header>
+
+    <main class="page-container">
+      <div class="hero-banner media-placeholder" data-art="Festivals"></div>
+
+      <div class="grid-catalog">
+        <!-- Filter Sidebar -->
+        <aside class="card-box form-field" style="align-self: start">
+          <h3>Filter</h3>
+
+          <label for="filter-title">Name</label>
+          <input type="text" id="filter-title" placeholder="z. B. Lumen" />
+
+          <label>Kategorie</label>
+          <div style="margin-bottom: 10px">
+            <label><input type="checkbox" value="Konzerte" /> Konzerte</label>
+            <label><input type="checkbox" value="Sport" /> Sport</label>
+            <label><input type="checkbox" value="Theater" /> Theater</label>
+            <label><input type="checkbox" value="Comedy" /> Comedy</label>
+          </div>
+
+          <label for="filter-date">Ab Datum</label>
+          <input type="date" id="filter-date" />
+
+          <label for="filter-location">Ort</label>
+          <select id="filter-location">
+            <option>Alle Orte</option>
+            <option>Stuttgart</option>
+            <option>Mannheim</option>
+            <option>Karlsruhe</option>
+          </select>
+
+          <label for="filter-price"
+            >Preis bis <b id="price-value">150</b> €</label
+          >
+          <input
+            type="range"
+            id="filter-price"
+            min="10"
+            max="150"
+            value="150"
+            style="accent-color: var(--color-primary)"
+          />
+
+          <button
+            class="button button--outline button--full"
+            id="btn-reset-filter"
+            style="margin-top: 10px"
+          >
+            Filter zurücksetzen
+          </button>
+        </aside>
+
+        <section>
+          <div class="catalog-header">
+            <h1 id="event-count-heading">Veranstaltungen</h1>
+            <select style="width: auto; margin: 0">
+              <option>Nach Datum</option>
+              <option>Nach Preis</option>
+            </select>
+          </div>
+
+          <div id="events-container">
+            <a href="detail.html?id=1" class="event-card">
+              <div
+                class="media-placeholder event-card__thumbnail"
+                data-art="Konzerte"
+              ></div>
+              <div class="event-card__date"><b>14</b><small>Nov</small></div>
+              <div>
+                <h3>Lumen – Live in Stuttgart</h3>
+                <div class="text-muted">Stuttgart · 20:00 Uhr</div>
+                <div style="margin-top: 6px">
+                  <span class="badge">Konzerte</span>
+                </div>
+              </div>
+              <div class="event-card__pricing">
+                <b>ab 49,00 €</b>
+                <button class="button button--small">Tickets</button>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__content">
+        <div>
+          <div class="brand-logo" style="color: #fff">Tix<i>ify</i></div>
+          <p>
+            Events finden, Tickets sicher buchen und sofort per E-Mail erhalten.
+          </p>
+        </div>
+        <div>
+          <h4>Impressum</h4>
+          <a>Anbieterkennzeichnung</a><a>Datenschutz</a><a>AGB</a>
+        </div>
+        <div>
+          <h4>Kontakt</h4>
+          <a>kontakt@tixify.example</a><a>Tel. 0711 123 456 0</a>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <a>Häufige Fragen</a><a>Ticket nicht erhalten?</a>
+        </div>
+        <div>
+          <h4>Bezahlarten</h4>
+          <div class="payment-methods">
+            <span>PayPal</span><span>Kreditkarte</span>
+          </div>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        © 2026 Tixify · Fallstudie Software Engineering, WWI25A
+      </div>
+    </footer>
+
+    <script type="module" src="js/common.js"></script>
+    <script type="module" src="js/home.js"></script>
+  </body>
+</html>
