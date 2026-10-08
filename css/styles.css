@@ -28,3 +28,28 @@
     --color-success: #5cc39a;
   }
 }
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text-main);
+  font:
+    15px/1.5 "Instrument Sans",
+    system-ui,
+    sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
