@@ -280,3 +280,84 @@ h3 {
   background: #f3ddd0;
   color: #8a3b16;
 }
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="password"],
+.form-field input[type="date"],
+.form-field input[type="number"],
+.form-field select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.form-field input[type="checkbox"] {
+  accent-color: var(--color-primary);
+}
+
+.catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.event-card {
+  display: grid;
+  grid-template-columns: 150px 64px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.event-card:hover {
+  border-color: var(--color-accent);
+}
+
+.event-card__thumbnail {
+  height: 92px;
+}
+
+.event-card__date {
+  text-align: center;
+  border-right: 1px solid var(--color-border);
+  padding-right: 12px;
+}
+
+.event-card__date b {
+  display: block;
+  font-size: 24px;
+  line-height: 1.1;
+  color: var(--color-primary);
+}
+
+.event-card__pricing {
+  text-align: right;
+}
+
+.event-card__pricing b {
+  font-size: 18px;
+  display: block;
+}
