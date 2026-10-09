@@ -60,3 +60,65 @@ function updatePriceDisplay() {
   document.getElementById("total-price").textContent =
     `${total.toFixed(2).replace(".", ",")} €`;
 }
+
+function initQuantityControls() {
+  const btnDecrease = document.getElementById("btn-decrease");
+  const btnIncrease = document.getElementById("btn-increase");
+
+  btnDecrease?.addEventListener("click", () => {
+    if (currentQuantity > 1) {
+      currentQuantity--;
+      updatePriceDisplay();
+    }
+  });
+
+  btnIncrease?.addEventListener("click", () => {
+    const stock = currentEvent
+      ? (currentEvent.event_stock ?? currentEvent.stock ?? 999)
+      : 999;
+    if (currentQuantity < stock) {
+      currentQuantity++;
+      updatePriceDisplay();
+    }
+  });
+}
+
+function initCheckoutButton() {
+  const checkoutBtn = document.getElementById("btn-checkout");
+  if (!checkoutBtn) return;
+
+  checkoutBtn.addEventListener("click", async () => {
+    const token =
+      localStorage.getItem("token") || localStorage.getItem("tixify_token");
+    if (!token) {
+      alert("Bitte melde dich zuerst an!");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get("id");
+
+    try {
+      await apiRequest("/cart/items", {
+        method: "POST",
+        body: JSON.stringify({
+          eventId: parseInt(eventId, 10),
+          quantity: currentQuantity,
+        }),
+      });
+
+      window.location.href = "checkout.html";
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen zum Warenkorb:", err);
+      alert(err.message || "Konnte nicht zum Warenkorb hinzugefügt werden.");
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupNavigation();
+  initQuantityControls();
+  initCheckoutButton();
+  loadEventDetails();
+});
