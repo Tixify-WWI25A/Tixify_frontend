@@ -66,3 +66,50 @@ async function loadCartFromServer() {
     console.error("Warenkorb konnte nicht geladen werden:", err);
   }
 }
+
+function initPayPal() {
+  const container = document.getElementById("paypal-button-container");
+  if (!container || typeof paypal === "undefined") {
+    return;
+  }
+
+  paypal
+    .Buttons({
+      createOrder: async () => {
+        const res = await apiRequest("/orders/create-paypal-order", {
+          method: "POST",
+          body: JSON.stringify({
+            amount: cartTotal,
+            items: currentCartItems,
+          }),
+        });
+        return res.paypalOrderId;
+      },
+      onApprove: async (data) => {
+        const captureResult = await apiRequest("/orders/capture-paypal-order", {
+          method: "POST",
+          body: JSON.stringify({ paypalOrderId: data.orderID }),
+        });
+
+        document
+          .getElementById("step-payment")
+          ?.classList.remove("checkout-steps__step--active");
+        document
+          .getElementById("step-confirmation")
+          ?.classList.add("checkout-steps__step--active");
+
+        document.getElementById("checkout-main-content").innerHTML = `
+        <div class="card-box">
+          <h2 class="order-status--paid">Buchung erfolgreich!</h2>
+          <p>Bestellnummer #${captureResult.orderId}. Deine Tickets wurden ausgestellt.</p>
+          <a href="bookings.html" class="button" style="margin-top: 12px;">Zu meinen Buchungen</a>
+        </div>
+      `;
+      },
+      onError: (err) => {
+        console.error("PayPal Checkout Fehler:", err);
+        alert("Die Zahlung konnte nicht abgeschlossen werden.");
+      },
+    })
+    .render("#paypal-button-container");
+}
