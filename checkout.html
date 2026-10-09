@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tixify – Kasse</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://www.paypal.com/sdk/js?client-id=AVndjgaKBKMmUmG3ThQ4_rHDU7F6D3a5IHI7miAYj8lFKTzMyUkNSMpl60ew6UW5LRmD6yfsBivJZYSj&currency=EUR"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__container">
+        <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
+        <nav class="nav-menu">
+          <a href="index.html" class="nav-menu__link">Event-Suche</a>
+          <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-container">
+      <div class="checkout-steps">
+        <div class="checkout-steps__step">1 Tickets</div>
+        <div
+          class="checkout-steps__step checkout-steps__step--active"
+          id="step-payment"
+        >
+          2 Zahlung
+        </div>
+        <div class="checkout-steps__step" id="step-confirmation">
+          3 Bestätigung
+        </div>
+      </div>
+
+      <div class="grid-two-columns">
+        <div id="checkout-main-content">
+          <div class="card-box form-field">
+            <h2>Rechnungsdaten</h2>
+            <label for="buyer-name">Name</label>
+            <input
+              type="text"
+              id="buyer-name"
+              placeholder="Name wird geladen..."
+            />
+
+            <label for="buyer-email">E-Mail für die Bestätigung</label>
+            <input
+              type="email"
+              id="buyer-email"
+              placeholder="E-Mail wird geladen..."
+            />
+          </div>
+
+          <div class="card-box" style="margin-top: 14px">
+            <h2>Zahlungsart</h2>
+            <p class="text-muted">
+              Die Abwicklung erfolgt sicher über die offizielle PayPal Sandbox
+              API.
+            </p>
+
+            <div id="paypal-button-container" style="margin-top: 12px"></div>
+          </div>
+        </div>
+
+        <aside class="card-box" style="align-self: start">
+          <h2>Deine Bestellung</h2>
+          <div class="summary-row"><span>Lumen – Live in Stuttgart</span></div>
+          <div class="summary-row text-muted">
+            <span>1 × 49,00 €</span><span>49,00 €</span>
+          </div>
+          <div class="summary-row text-muted">
+            <span>Servicegebühr</span><span>2,00 €</span>
+          </div>
+          <div class="summary-row summary-row--total">
+            <span>Gesamt</span><span>51,00 €</span>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script type="module" src="js/checkout.js"></script>
+    <script type="module" src="js/common.js"></script>
+  </body>
+</html>
