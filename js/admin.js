@@ -109,3 +109,73 @@ function openModalForEdit(event) {
 function closeModal() {
   modal.classList.remove("is-open");
 }
+
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const id = idInput.value;
+  const isEdit = Boolean(id);
+
+  const payload = {
+    title: document.getElementById("event-title").value.trim(),
+    category: document.getElementById("event-category").value.trim(),
+    location: document.getElementById("event-location").value.trim(),
+    event_date: document.getElementById("event-date").value,
+    price: parseFloat(document.getElementById("event-price").value),
+    event_stock: parseInt(document.getElementById("event-stock").value, 10),
+    description: document.getElementById("event-description").value.trim(),
+  };
+
+  try {
+    if (isEdit) {
+      await apiRequest(`/events/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      alert("Event erfolgreich aktualisiert!");
+    } else {
+      await apiRequest("/events", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      alert("Event erfolgreich erstellt!");
+    }
+
+    closeModal();
+    loadEvents();
+  } catch (err) {
+    console.error("Fehler beim Speichern:", err);
+    alert(err.message || "Speichern fehlgeschlagen.");
+  }
+}
+
+async function deleteEvent(id) {
+  try {
+    await apiRequest(`/events/${id}`, { method: "DELETE" });
+    alert("Event gelöscht.");
+    loadEvents();
+  } catch (err) {
+    console.error("Fehler beim Löschen:", err);
+    alert(err.message || "Löschen fehlgeschlagen.");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupNavigation();
+  loadEvents();
+
+  document
+    .getElementById("open-create-modal-btn")
+    ?.addEventListener("click", openModalForCreate);
+  document
+    .getElementById("modal-close-btn")
+    ?.addEventListener("click", closeModal);
+  document
+    .getElementById("modal-cancel-btn")
+    ?.addEventListener("click", closeModal);
+  form?.addEventListener("submit", handleFormSubmit);
+
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+});
