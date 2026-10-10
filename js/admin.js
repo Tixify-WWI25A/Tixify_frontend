@@ -74,3 +74,38 @@ async function loadEvents() {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Fehler: ${err.message}</td></tr>`;
   }
 }
+
+function openModalForCreate() {
+  form.reset();
+  idInput.value = "";
+  modalTitle.textContent = "Neues Event erstellen";
+  modal.classList.add("is-open");
+}
+
+function openModalForEdit(event) {
+  form.reset();
+  idInput.value = event.event_id;
+  modalTitle.textContent = `Event #${event.event_id} bearbeiten`;
+
+  document.getElementById("event-title").value = event.title || "";
+  document.getElementById("event-category").value = event.category || "";
+  document.getElementById("event-location").value = event.location || "";
+
+  if (event.event_date) {
+    const d = new Date(event.event_date);
+    document.getElementById("event-date").value = d.toISOString().split("T")[0];
+  } else {
+    document.getElementById("event-date").value = "";
+  }
+
+  document.getElementById("event-price").value = event.price || "";
+  document.getElementById("event-stock").value =
+    event.event_stock ?? event.stock ?? "";
+  document.getElementById("event-description").value = event.description || "";
+
+  modal.classList.add("is-open");
+}
+
+function closeModal() {
+  modal.classList.remove("is-open");
+}
