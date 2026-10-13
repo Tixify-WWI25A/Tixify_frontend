@@ -41,10 +41,47 @@ async function loadEventDetails() {
     const stock = currentEvent.event_stock ?? currentEvent.stock ?? 0;
     document.getElementById("ticket-stock").textContent = `${stock} Tickets`;
 
+    renderEventMapAndAddress(currentEvent);
     updatePriceDisplay();
   } catch (err) {
     console.error("Fehler beim Laden des Events:", err);
     alert("Event konnte nicht geladen werden.");
+  }
+}
+
+function renderEventMapAndAddress(eventData) {
+  const addressTextEl = document.getElementById("event-address-text");
+  const mapContainer = document.getElementById("event-map");
+
+  if (!mapContainer) return;
+
+  const fullAddress = eventData.address || eventData.location || "Keine Adresse angegeben";
+  if (addressTextEl) {
+    addressTextEl.textContent = fullAddress;
+  }
+
+  const lat = parseFloat(eventData.latitude);
+  const lng = parseFloat(eventData.longitude);
+  const hasValidCoords = !isNaN(lat) && !isNaN(lng);
+
+  const position = hasValidCoords ? [lat, lng] : [51.1657, 10.4515];
+  const zoomLevel = hasValidCoords ? 15 : 6;
+
+  if (mapContainer._leaflet_id) {
+    mapContainer._leaflet_id = null;
+  }
+
+  const map = L.map("event-map").setView(position, zoomLevel);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+
+  if (hasValidCoords) {
+    L.marker(position).addTo(map)
+      .bindPopup(eventData.title || "Veranstaltungsort")
+      .openPopup();
   }
 }
 
