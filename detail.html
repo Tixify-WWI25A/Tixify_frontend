@@ -8,6 +8,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
     />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
@@ -43,10 +44,12 @@
           </p>
 
           <h2>Veranstaltungsort</h2>
+          <p id="event-address-text" style="font-weight: 500; margin-bottom: 10px; color: #555;">
+            Adresse wird geladen...
+          </p>
           <div
-            class="media-placeholder"
-            data-art="map"
-            style="height: 140px"
+            id="event-map"
+            style="height: 240px; width: 100%; border-radius: 8px; border: 1px solid #ddd; z-index: 1;"
           ></div>
         </div>
 
@@ -88,6 +91,7 @@
       </div>
     </main>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="js/common.js"></script>
     <script type="module" src="js/detail.js"></script>
   </body>
