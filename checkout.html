@@ -1,88 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tixify – Kasse</title>
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
-    />
-    <link rel="stylesheet" href="css/styles.css" />
-    <script src="https://www.paypal.com/sdk/js?client-id=AVndjgaKBKMmUmG3ThQ4_rHDU7F6D3a5IHI7miAYj8lFKTzMyUkNSMpl60ew6UW5LRmD6yfsBivJZYSj&currency=EUR"></script>
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="site-header__container">
-        <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
-        <nav class="nav-menu">
-          <a href="index.html" class="nav-menu__link">Event-Suche</a>
-          <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
-        </nav>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tixify – Kasse & Warenkorb</title>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
+      <div class="search-bar">
+        <input type="text" id="search-input" class="search-bar__input" placeholder="Events, Künstler, Orte suchen...">
+        <button class="button" type="button" id="search-button">Suchen</button>
       </div>
-    </header>
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-menu__link">Event-Suche</a>
+        <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
+        <a href="login.html" class="nav-menu__link" id="nav-auth-link">Anmelden</a>
+      </nav>
+    </div>
+  </header>
 
-    <main class="page-container">
-      <div class="checkout-steps">
-        <div class="checkout-steps__step">1 Tickets</div>
-        <div
-          class="checkout-steps__step checkout-steps__step--active"
-          id="step-payment"
-        >
-          2 Zahlung
-        </div>
-        <div class="checkout-steps__step" id="step-confirmation">
-          3 Bestätigung
-        </div>
-      </div>
+  <main class="page-container">
+    <div class="checkout-steps">
+      <div class="checkout-steps__step checkout-steps__step--active" id="step-tab-1">1 Tickets & Warenkorb</div>
+      <div class="checkout-steps__step" id="step-tab-2">2 Zahlung & Rechnungsdaten</div>
+      <div class="checkout-steps__step" id="step-tab-3">3 Bestätigung</div>
+    </div>
 
-      <div class="grid-two-columns">
-        <div id="checkout-main-content">
-          <div class="card-box form-field">
-            <h2>Rechnungsdaten</h2>
-            <label for="buyer-name">Name</label>
-            <input
-              type="text"
-              id="buyer-name"
-              placeholder="Name wird geladen..."
-            />
-
-            <label for="buyer-email">E-Mail für die Bestätigung</label>
-            <input
-              type="email"
-              id="buyer-email"
-              placeholder="E-Mail wird geladen..."
-            />
+    <div class="grid-two-columns">
+      <div>
+        <div id="step-content-1" class="checkout-step-content is-active card-box">
+          <h2>Dein Warenkorb</h2>
+          <div id="cart-items-container">
+            <p class="text-muted">Lade Warenkorb...</p>
           </div>
 
-          <div class="card-box" style="margin-top: 14px">
-            <h2>Zahlungsart</h2>
-            <p class="text-muted">
-              Die Abwicklung erfolgt sicher über die offizielle PayPal Sandbox
-              API.
-            </p>
-
-            <div id="paypal-button-container" style="margin-top: 12px"></div>
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; border-top: 1px solid var(--color-border); padding-top: 16px;">
+            <a href="index.html" class="button button--outline">← Weiter einkaufen</a>
+            <button type="button" id="btn-to-payment" class="button">Weiter zur Zahlung →</button>
           </div>
         </div>
 
-        <aside class="card-box" style="align-self: start">
-          <h2>Deine Bestellung</h2>
-          <div class="summary-row"><span>Lumen – Live in Stuttgart</span></div>
-          <div class="summary-row text-muted">
-            <span>1 × 49,00 €</span><span>49,00 €</span>
+        <div id="step-content-2" class="checkout-step-content card-box">
+          <h2>Rechnungsdaten</h2>
+          <div class="modal-form-grid" style="margin-top: 0; margin-bottom: 20px;">
+            <div class="full-width">
+              <label for="billing-name">Name</label>
+              <input type="text" id="billing-name" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+            </div>
+            <div class="full-width">
+              <label for="billing-email">E-Mail für die Bestätigung</label>
+              <input type="email" id="billing-email" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+            </div>
           </div>
-          <div class="summary-row text-muted">
-            <span>Servicegebühr</span><span>2,00 €</span>
-          </div>
-          <div class="summary-row summary-row--total">
-            <span>Gesamt</span><span>51,00 €</span>
-          </div>
-        </aside>
-      </div>
-    </main>
 
-    <script type="module" src="js/checkout.js"></script>
-    <script type="module" src="js/common.js"></script>
-  </body>
+          <h2>Zahlungsart</h2>
+          <p class="text-muted" style="margin-bottom: 16px;">Die Abwicklung erfolgt über den offiziellen PayPal
+            Sandbox-Service.</p>
+
+          <div id="paypal-button-container" style="min-height: 45px;"></div>
+
+          <div style="margin-top: 20px; border-top: 1px solid var(--color-border); padding-top: 14px;">
+            <button type="button" id="btn-back-to-cart" class="button button--outline">← Zurück zum Warenkorb</button>
+          </div>
+        </div>
+
+        <div id="step-content-3" class="checkout-step-content card-box" style="text-align: center; padding: 36px 20px;">
+          <div style="font-size: 48px; color: var(--color-success); margin-bottom: 12px;">✓</div>
+          <h2 style="font-size: 24px; margin-bottom: 8px;">Buchung erfolgreich abgeschlossen!</h2>
+          <p class="text-muted" style="max-width: 480px; margin: 0 auto 24px;">
+            Deine Tickets wurden generiert und die Bestätigung per E-Mail versendet.
+          </p>
+          <p><strong>Bestellnummer:</strong> <span id="confirmed-order-id">-</span></p>
+          <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px;">
+            <a href="bookings.html" class="button">Zu meinen Buchungen</a>
+            <a href="index.html" class="button button--outline">Zur Startseite</a>
+          </div>
+        </div>
+      </div>
+
+      <aside class="card-box" style="align-self: start; position: sticky; top: 12px;">
+        <h2>Deine Bestellung</h2>
+        <div id="order-summary-list">
+          <p class="text-muted">Lade Übersicht...</p>
+        </div>
+
+        <div class="summary-row summary-row--total">
+          <span>Gesamt</span>
+          <span id="order-total-price">0,00 €</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=EUR"></script>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/checkout.js"></script>
+</body>
+
 </html>
