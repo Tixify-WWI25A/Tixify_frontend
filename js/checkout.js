@@ -20,13 +20,20 @@ async function initCheckout() {
 }
 
 async function loadUserData() {
-  const nameField = document.getElementById('billing-name');
-  const emailField = document.getElementById('billing-email');
+  const nameDisplay = document.getElementById('billing-name-display');
+  const emailDisplay = document.getElementById('billing-email-display');
+  const avatarElem = document.getElementById('billing-avatar');
+  const nameInput = document.getElementById('billing-name');
+  const emailInput = document.getElementById('billing-email');
 
   try {
-    const userRaw = localStorage.getItem('user');
+    const userRaw = localStorage.getItem('user') || localStorage.getItem('tixify_user');
     if (userRaw && userRaw !== 'null' && userRaw !== 'undefined') {
-      currentUser = JSON.parse(userRaw);
+      try {
+        currentUser = JSON.parse(userRaw);
+      } catch (e) {
+        currentUser = null;
+      }
     }
 
     if (!currentUser) {
@@ -37,13 +44,22 @@ async function loadUserData() {
       }
     }
 
-    if (currentUser) {
-      if (nameField) nameField.value = currentUser.username || currentUser.name || currentUser.email?.split('@')[0] || 'Kunde';
-      if (emailField) emailField.value = currentUser.email || '';
-    }
+    const userName = currentUser?.name || currentUser?.username || currentUser?.email?.split('@')[0] || 'Kunde';
+    const userEmail = currentUser?.email || 'Keine E-Mail hinterlegt';
+    const initialLetter = userName.trim().charAt(0).toUpperCase() || 'K';
+
+    if (nameDisplay) nameDisplay.textContent = userName;
+    if (emailDisplay) emailDisplay.textContent = userEmail;
+    if (avatarElem) avatarElem.textContent = initialLetter;
+
+    if (nameInput) nameInput.value = userName;
+    if (emailInput) emailInput.value = userEmail;
+
   } catch (err) {
     console.warn('Benutzerdaten konnten nicht geladen werden:', err);
-    if (nameField) nameField.value = 'Kunde';
+    if (nameDisplay) nameDisplay.textContent = 'Kunde';
+    if (emailDisplay) emailDisplay.textContent = '';
+    if (avatarElem) avatarElem.textContent = 'K';
   }
 }
 
@@ -264,20 +280,7 @@ function initPayPal() {
 
   window.paypal.Buttons({
     createOrder: async () => {
-      try {
-        const res = await apiRequest('/orders/create-paypal-order', {
-          method: 'POST'
-        });
-
-        const orderId = res.paypalOrderId || res.id;
-
-        if (!orderId) {
-          throw new Error('Keine PayPal Order-ID erhalten: ' + JSON.stringify(res));
-        }
-
-        return orderId;
-
-      } catch (err) {
+      try { l } catch (err) {
         showToast(err.message || 'PayPal Order konnte nicht erstellt werden.', 'error');
         throw err;
       }
