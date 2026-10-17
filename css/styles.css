@@ -44,7 +44,10 @@ body {
   font: 15px/1.5 "Instrument Sans", system-ui, sans-serif;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -98,7 +101,8 @@ button, input, select, textarea {
   font-size: 14px;
 }
 
-.nav-menu__link, .category-bar__link {
+.nav-menu__link,
+.category-bar__link {
   padding: 8px 12px;
   cursor: pointer;
   color: var(--color-text-main);
@@ -106,7 +110,8 @@ button, input, select, textarea {
   border-radius: 4px;
 }
 
-.nav-menu__link:hover, .category-bar__link:hover {
+.nav-menu__link:hover,
+.category-bar__link:hover {
   background: var(--color-accent-soft);
 }
 
@@ -236,13 +241,25 @@ button, input, select, textarea {
   padding: 16px;
 }
 
-.card-box + .card-box {
+.card-box+.card-box {
   margin-top: 14px;
 }
 
-h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.4px;}
-h2 { font-size: 18px; margin: 0 0 10px; }
-h3 { font-size: 15px; margin: 0 0 6px; }
+h1 {
+  font-size: 26px;
+  margin: 0 0 4px;
+  letter-spacing: -0.4px;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+}
 
 .text-muted {
   color: var(--color-text-muted);
@@ -570,6 +587,55 @@ h3 { font-size: 15px; margin: 0 0 6px; }
   font-weight: 600;
 }
 
+.checkout-step-content {
+  display: none !important;
+}
+
+.checkout-step-content.is-active {
+  display: block !important;
+}
+
+.billing-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--color-bg, #f3efe6);
+  border: 1px solid var(--color-border, #d9d3c5);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+
+.billing-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-primary, #3b3fa8);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.billing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.billing-details b {
+  font-size: 15px;
+  color: var(--color-text-main, #1f1b3a);
+}
+
+.billing-details span {
+  font-size: 13px;
+  color: var(--color-text-muted, #6a6684);
+}
+
 .ticket-item {
   display: flex;
   border: 1px dashed var(--color-accent);
@@ -678,24 +744,30 @@ h3 { font-size: 15px; margin: 0 0 6px; }
 }
 
 @media (max-width: 860px) {
+
   .grid-catalog,
   .grid-two-columns,
   .grid-auth-split {
     grid-template-columns: 1fr;
   }
+
   .event-card {
     grid-template-columns: 1fr 1fr;
   }
+
   .event-card__thumbnail {
     grid-column: 1 / -1;
   }
+
   .site-header__container {
     flex-wrap: wrap;
   }
+
   .nav-menu {
     margin-left: 0;
     flex-wrap: wrap;
   }
+
   .site-footer__content {
     grid-template-columns: 1fr 1fr;
   }
