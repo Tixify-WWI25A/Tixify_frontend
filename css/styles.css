@@ -748,3 +748,42 @@ h3 { font-size: 15px; margin: 0 0 6px; }
   color: #B91C1C;
   border-color: #FECACA;
 }
+
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background-color: #1f2937;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  max-width: 350px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast--success {
+  background-color: #10b981;
+}
+
+.toast--error {
+  background-color: #ef4444;
+}

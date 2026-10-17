@@ -1,4 +1,5 @@
 import { apiRequest, setupNavigation } from "./api.js";
+import { showToast } from "./common.js";
 
 let allEvents = [];
 
@@ -132,31 +133,31 @@ async function handleFormSubmit(e) {
         method: "PUT",
         body: JSON.stringify(payload),
       });
-      alert("Event erfolgreich aktualisiert!");
+      showToast("Event erfolgreich aktualisiert!", "success");
     } else {
       await apiRequest("/events", {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      alert("Event erfolgreich erstellt!");
+      showToast("Event erfolgreich erstellt!", "success");
     }
 
     closeModal();
     loadEvents();
   } catch (err) {
     console.error("Fehler beim Speichern:", err);
-    alert(err.message || "Speichern fehlgeschlagen.");
+    showToast(err.message || "Speichern fehlgeschlagen.", "error");
   }
 }
 
 async function deleteEvent(id) {
   try {
     await apiRequest(`/events/${id}`, { method: "DELETE" });
-    alert("Event gelöscht.");
+    showToast("Event gelöscht.", "success");
     loadEvents();
   } catch (err) {
     console.error("Fehler beim Löschen:", err);
-    alert(err.message || "Löschen fehlgeschlagen.");
+    showToast(err.message || "Löschen fehlgeschlagen.", "error");
   }
 }
 

@@ -1,4 +1,5 @@
 import { apiRequest } from "./api.js";
+import { showToast } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.getElementById("register-form");
@@ -22,9 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }),
         });
 
-        alert(
+        showToast(
           res.message ||
             "Konto erfolgreich erstellt! Du kannst dich jetzt anmelden.",
+          "success"
         );
         registerForm.reset();
 
@@ -32,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (loginEmail) loginEmail.value = email;
       } catch (err) {
         console.error("Fehler bei Registrierung:", err);
-        alert(err.message || "Registrierung fehlgeschlagen.");
+        showToast(err.message || "Registrierung fehlgeschlagen.", "error");
       }
     });
   }
@@ -65,14 +67,16 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("tixify_user", userString);
           localStorage.setItem("user", userString);
 
-          alert("Erfolgreich angemeldet!");
-          window.location.href = "index.html";
+          showToast("Erfolgreich angemeldet!", "success");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1200);
         } else {
-          alert("Login fehlgeschlagen: Kein Token erhalten.");
+          showToast("Login fehlgeschlagen: Kein Token erhalten.", "error");
         }
       } catch (err) {
         console.error("Fehler beim Login:", err);
-        alert(err.message || "Anmeldung fehlgeschlagen. Bitte Daten prüfen.");
+        showToast(err.message || "Anmeldung fehlgeschlagen. Bitte Daten prüfen.", "error");
       }
     });
   }
