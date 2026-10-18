@@ -78,6 +78,80 @@ function populateLocationDropdown(events) {
     uniqueLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
 }
 
+/**
+ * Filtert und sortiert alle Events und stößt das Rendering der Paginierung an
+ */
+function applyFilters() {
+  const searchInput = document.getElementById('search-input');
+  const search = (searchInput?.value || '').trim().toLowerCase();
+
+  const nameInput = document.getElementById('filter-title');
+  const nameFilter = (nameInput?.value || '').trim().toLowerCase();
+
+  const priceInput = document.getElementById('filter-price');
+  const maxPrice = priceInput ? parseFloat(priceInput.value) : Infinity;
+
+  const locSelect = document.getElementById('filter-location');
+  const location = locSelect ? locSelect.value : 'Alle Orte';
+
+  const filterDateInput = document.getElementById('filter-date');
+  const filterDateVal = filterDateInput ? filterDateInput.value : '';
+
+  const sortSelect = document.getElementById('sort-select');
+  const sortOption = sortSelect ? sortSelect.value : 'date-asc';
+
+  // Ausgewählte Checkbox- bzw. Chip-Kategorien
+  const selectedCheckboxes = Array.from(
+    document.querySelectorAll('.form-field input[type="checkbox"]:checked, .category-filter-group input[type="checkbox"]:checked')
+  ).map(cb => cb.value.toLowerCase());
+
+  let filtered = allEvents.filter(e => {
+    const title = (e.title || '').toLowerCase();
+    const loc = (e.location || '').toLowerCase();
+    const cat = (e.category || 'Event').toLowerCase();
+
+    // 1. Suche über Suchfeld (Titel, Ort, Kategorie)
+    const matchesSearch = !search || title.includes(search) || loc.includes(search) || cat.includes(search);
+      
+    // 2. Namensfilter aus der Sidebar
+    const matchesName = !nameFilter || title.includes(nameFilter);
+
+    // 3. Preis-Filter
+    const matchesPrice = parseFloat(e.price) <= maxPrice;
+
+    // 4. Ort-Filter
+    const matchesLoc = location === 'Alle Orte' || e.location === location;
+
+    // 5. Datumsfilter (ab gewähltem Datum)
+    let matchesDate = true;
+    if (filterDateVal) {
+      const selectedDate = new Date(filterDateVal);
+      selectedDate.setHours(0, 0, 0, 0);
+      matchesDate = new Date(e.event_date) >= selectedDate;
+    }
+
+    // 6. Kategorie-Filter (obere Leiste)
+    const matchesTopCategory = (activeTopCategory === 'Alle') || (cat === activeTopCategory.toLowerCase());
+
+    // 7. Kategorie-Filter (Sidebar-Auswahl)
+    const matchesCheckboxCategory = selectedCheckboxes.length === 0 || selectedCheckboxes.includes(cat);
+
+    return matchesSearch && matchesName && matchesPrice && matchesLoc && matchesDate && matchesTopCategory && matchesCheckboxCategory;
+  });
+
+  // 8. Sortierung anwenden
+  filtered.sort((a, b) => {
+    if (sortOption === 'price-asc') return parseFloat(a.price) - parseFloat(b.price);
+    if (sortOption === 'price-desc') return parseFloat(b.price) - parseFloat(a.price);
+    if (sortOption === 'date-desc') return new Date(b.event_date) - new Date(a.event_date);
+    return new Date(a.event_date) - new Date(b.event_date); // Standard: date-asc
+  });
+
+  currentFilteredEvents = filtered;
+  currentPage = 1; // Bei jeder Filteränderung zurück auf Seite 1
+  renderPaginatedEvents();
+}
+
 function renderEvents(events) {
   const listContainer = document.getElementById("events-container");
   const countHeading = document.getElementById("event-count-heading");
