@@ -280,7 +280,7 @@ function initPayPal() {
 
   window.paypal.Buttons({
     createOrder: async () => {
-      try { l } catch (err) {
+      try { } catch (err) {
         showToast(err.message || 'PayPal Order konnte nicht erstellt werden.', 'error');
         throw err;
       }
