@@ -152,58 +152,76 @@ function applyFilters() {
   renderPaginatedEvents();
 }
 
-function renderEvents(events) {
-  const listContainer = document.getElementById("events-container");
-  const countHeading = document.getElementById("event-count-heading");
+/**
+ * Berechnet den aktuellen Ausschnitt und rendert Cards sowie Buttons
+ */
+function renderPaginatedEvents() {
+  const countHeading = document.getElementById('event-count-heading');
+  if (countHeading) {
+    countHeading.textContent = `${currentFilteredEvents.length} ${currentFilteredEvents.length === 1 ? 'Veranstaltung' : 'Veranstaltungen'}`;
+  }
 
-  countHeading.textContent = `${events.length} ${events.length === 1 ? "Veranstaltung" : "Veranstaltungen"}`;
+  const totalPages = Math.ceil(currentFilteredEvents.length / EVENTS_PER_PAGE) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
+  const pageEvents = currentFilteredEvents.slice(startIndex, startIndex + EVENTS_PER_PAGE);
+
+  renderEventsList(pageEvents);
+  renderPaginationControls(totalPages);
+}
+
+/**
+ * Erzeugt die HTML-Karten für die übergebenen Events
+ */
+function renderEventsList(events) {
+  const listContainer = document.getElementById('events-container');
+  if (!listContainer) return;
 
   if (events.length === 0) {
-    listContainer.innerHTML =
-      '<div class="card-box">Keine Events gefunden.</div>';
+    listContainer.innerHTML = '<div class="card-box" style="grid-column: 1 / -1; padding: 24px; text-align: center;">Keine Events gefunden, die deinen Filterkriterien entsprechen.</div>';
     return;
   }
 
-  listContainer.innerHTML = events
-    .map((e) => {
-      const d = new Date(e.event_date);
-      const day = d.getDate();
-      const month = d.toLocaleString("de-DE", { month: "short" });
-      const time = d.toLocaleTimeString("de-DE", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const priceFormatted = parseFloat(e.price).toFixed(2).replace(".", ",");
+  listContainer.innerHTML = events.map(e => {
+    const d = new Date(e.event_date);
+    const day = d.getDate();
+    const month = d.toLocaleString('de-DE', { month: 'short' });
+    const time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const priceFormatted = parseFloat(e.price).toFixed(2).replace('.', ',');
 
-      const isSoldOut = e.event_stock === 0;
-      const badgeWarning = isSoldOut
-        ? '<span class="badge badge--warning">Ausverkauft</span>'
-        : e.event_stock < 10
-          ? `<span class="badge badge--warning">Nur noch ${e.event_stock}</span>`
-          : "";
+    const isSoldOut = e.event_stock === 0;
+    const badgeWarning = isSoldOut 
+      ? '<span class="badge badge--warning">Ausverkauft</span>' 
+      : (e.event_stock < 10 ? `<span class="badge badge--warning">Nur noch ${e.event_stock}</span>` : '');
 
-      return `
+    const eventCategory = e.category || 'Event';
+    const categoryClass = 'badge--' + eventCategory.toLowerCase().trim();
+
+    // Eigene logo_url bevorzugen, sonst Fallback auf das generierte SVG art()
+    const imageUrl = e.logo_url || art(eventCategory, e.event_id);
+
+    return `
       <a href="detail.html?id=${e.event_id}" class="event-card">
-        <div class="media-placeholder event-card__thumbnail" style="background-image: url('${art("Konzerte", e.event_id)}')"></div>
+        <div class="media-placeholder event-card__thumbnail" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;"></div>
         <div class="event-card__date">
           <b>${day}</b><small>${month}</small>
         </div>
         <div>
           <h3>${e.title}</h3>
-          <div class="text-muted">${e.location} · ${time} Uhr</div>
+          <div class="text-muted">${e.location || 'Ohne Ortsangabe'} · ${time} Uhr</div>
           <div style="margin-top: 6px;">
-            <span class="badge">Event</span>
+            <span class="badge ${categoryClass}">${eventCategory}</span>
             ${badgeWarning}
           </div>
         </div>
         <div class="event-card__pricing">
           <b>ab ${priceFormatted} €</b>
-          <button class="button button--small" ${isSoldOut ? 'disabled style="opacity:.4"' : ""}>Tickets</button>
+          <button class="button button--small" ${isSoldOut ? 'disabled style="opacity:.4"' : ''}>Tickets</button>
         </div>
       </a>
     `;
-    })
-    .join("");
+  }).join('');
 }
 
 function applyFilters() {
