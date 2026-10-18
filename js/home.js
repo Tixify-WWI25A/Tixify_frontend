@@ -224,25 +224,51 @@ function renderEventsList(events) {
   }).join('');
 }
 
-function applyFilters() {
-  const search = document.getElementById("search-input").value.toLowerCase();
-  const nameFilter = document
-    .getElementById("filter-title")
-    .value.toLowerCase();
-  const maxPrice = parseFloat(document.getElementById("filter-price").value);
-  const location = document.getElementById("filter-location").value;
+/**
+ * Baut die Paginierungs-Buttons
+ */
+function renderPaginationControls(totalPages) {
+  const container = document.getElementById('pagination-container');
+  if (!container) return;
 
-  const filtered = allEvents.filter((e) => {
-    const matchesSearch =
-      e.title.toLowerCase().includes(search) ||
-      e.location.toLowerCase().includes(search);
-    const matchesName = e.title.toLowerCase().includes(nameFilter);
-    const matchesPrice = parseFloat(e.price) <= maxPrice;
-    const matchesLoc = location === "Alle Orte" || e.location === location;
-    return matchesSearch && matchesName && matchesPrice && matchesLoc;
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = `<button class="page-btn" id="prev-page-btn" ${currentPage === 1 ? 'disabled' : ''}>&larr;</button>`;
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button class="page-btn ${i === currentPage ? 'is-active' : ''}" data-page="${i}">${i}</button>`;
+  }
+
+  html += `<button class="page-btn" id="next-page-btn" ${currentPage === totalPages ? 'disabled' : ''}>&rarr;</button>`;
+  container.innerHTML = html;
+
+  // Event Listener für Seiten-Klicks
+  container.querySelectorAll('.page-btn[data-page]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      currentPage = parseInt(e.target.dataset.page, 10);
+      renderPaginatedEvents();
+      document.getElementById('events-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
 
-  renderEvents(filtered);
+  document.getElementById('prev-page-btn')?.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderPaginatedEvents();
+      document.getElementById('events-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  document.getElementById('next-page-btn')?.addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderPaginatedEvents();
+      document.getElementById('events-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
