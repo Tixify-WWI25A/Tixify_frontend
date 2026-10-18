@@ -10,13 +10,36 @@ let currentFilteredEvents = [];
 
 async function loadEvents() {
   const listContainer = document.getElementById("events-container");
-  const countHeading = document.getElementById("event-count-heading");
 
   try {
     allEvents = await apiRequest("/events");
-    renderEvents(allEvents);
+    initPriceFilter(allEvents);
+    populateLocationDropdown(allEvents);
+
+    // URL-Suchparameter prüfen (z. B. index.html?search=Rock)
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get("search");
+    if (searchQuery) {
+      const searchInput = document.getElementById("search-input");
+      if (searchInput) {
+        searchInput.value = searchQuery;
+      }
+    }
+
+    applyFilters();
+
+    // Falls per URL gesucht wurde: Sanft zu den Events scrollen
+    if (searchQuery) {
+      setTimeout(() => {
+        document
+          .getElementById("events-container")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+    }
   } catch (err) {
-    listContainer.innerHTML = `<div class="card-box">Fehler beim Laden: ${err.message}</div>`;
+    if (listContainer) {
+      listContainer.innerHTML = `<div class="card-box">Fehler beim Laden: ${err.message}</div>`;
+    }
   }
 }
 
