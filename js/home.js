@@ -31,9 +31,7 @@ async function loadEvents() {
     // Falls per URL gesucht wurde: Sanft zu den Events scrollen
     if (searchQuery) {
       setTimeout(() => {
-        document
-          .getElementById("events-container")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("events-container")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     }
   } catch (err) {
@@ -41,6 +39,43 @@ async function loadEvents() {
       listContainer.innerHTML = `<div class="card-box">Fehler beim Laden: ${err.message}</div>`;
     }
   }
+}
+
+/**
+ * Ermittelt den Höchstpreis aller Events und skaliert den Slider dynamisch
+ */
+function initPriceFilter(events) {
+  if (!events || events.length === 0) return;
+
+  const prices = events.map(e => parseFloat(e.price)).filter(p => !isNaN(p));
+  if (prices.length === 0) return;
+
+  // Höchstpreis auf volle 10er-Stelle aufrunden (z. B. 199.99 € -> 200 €)
+  maxEventPrice = Math.ceil(Math.max(...prices) / 10) * 10;
+
+  const priceSlider = document.getElementById('filter-price');
+  const priceValue = document.getElementById('price-value');
+
+  if (priceSlider) {
+    priceSlider.max = maxEventPrice;
+    priceSlider.value = maxEventPrice;
+  }
+  if (priceValue) {
+    priceValue.textContent = maxEventPrice;
+  }
+}
+
+/**
+ * Füllt das Dropdown dynamisch mit den tatsächlich in der Datenbank vorkommenden Orten
+ */
+function populateLocationDropdown(events) {
+  const locSelect = document.getElementById('filter-location');
+  if (!locSelect) return;
+
+  const uniqueLocations = [...new Set(events.map(e => e.location).filter(Boolean))].sort();
+
+  locSelect.innerHTML = '<option value="Alle Orte">Alle Orte</option>' +
+    uniqueLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
 }
 
 function renderEvents(events) {
