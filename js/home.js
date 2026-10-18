@@ -2,6 +2,11 @@ import { apiRequest, setupNavigation } from "./api.js";
 import { art } from "../js/common.js";
 
 let allEvents = [];
+let activeTopCategory = "Alle";
+let maxEventPrice = 150;
+let currentPage = 1;
+const EVENTS_PER_PAGE = 6; // 6 Events pro Seite (2 Zeilen à 3 Karten)
+let currentFilteredEvents = [];
 
 async function loadEvents() {
   const listContainer = document.getElementById("events-container");
