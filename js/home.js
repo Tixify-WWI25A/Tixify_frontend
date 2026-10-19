@@ -271,30 +271,94 @@ function renderPaginationControls(totalPages) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   loadEvents();
 
-  document.getElementById("filter-price").addEventListener("input", (e) => {
-    document.getElementById("price-value").textContent = e.target.value;
-    applyFilters();
-  });
-  document
-    .getElementById("filter-title")
-    .addEventListener("input", applyFilters);
-  document
-    .getElementById("search-input")
-    .addEventListener("input", applyFilters);
-  document
-    .getElementById("filter-location")
-    .addEventListener("change", applyFilters);
+  // Slider & Display
+  const priceSlider = document.getElementById('filter-price');
+  if (priceSlider) {
+    priceSlider.addEventListener('input', (e) => {
+      const priceVal = document.getElementById('price-value');
+      if (priceVal) priceVal.textContent = e.target.value;
+      applyFilters();
+    });
+  }
 
-  document.getElementById("btn-reset-filter").addEventListener("click", () => {
-    document.getElementById("filter-title").value = "";
-    document.getElementById("search-input").value = "";
-    document.getElementById("filter-price").value = 150;
-    document.getElementById("price-value").textContent = 150;
-    document.getElementById("filter-location").selectedIndex = 0;
-    renderEvents(allEvents);
+  // Filter-Inputs & Selects
+  document.getElementById('filter-title')?.addEventListener('input', applyFilters);
+  document.getElementById('filter-location')?.addEventListener('change', applyFilters);
+  document.getElementById('filter-date')?.addEventListener('change', applyFilters);
+  document.getElementById('sort-select')?.addEventListener('change', applyFilters);
+
+  // Suche
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyFilters();
+      }
+    });
+  }
+
+  const searchBtn = document.querySelector('.search-bar button') || document.getElementById('search-button');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      applyFilters();
+    });
+  }
+
+  // Kategorie-Chips in der Sidebar
+  document.querySelectorAll('.form-field input[type="checkbox"], .category-filter-group input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+  });
+
+  // Obere Kategorie-Leiste
+  document.querySelectorAll('.category-bar__link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.category-bar__link').forEach(l => l.classList.remove('category-bar__link--active'));
+      link.classList.add('category-bar__link--active');
+      activeTopCategory = link.textContent.trim();
+      applyFilters();
+    });
+  });
+
+  // Reset Button
+  document.getElementById('btn-reset-filter')?.addEventListener('click', () => {
+    const titleIn = document.getElementById('filter-title');
+    if (titleIn) titleIn.value = '';
+
+    const searchIn = document.getElementById('search-input');
+    if (searchIn) searchIn.value = '';
+
+    const dateIn = document.getElementById('filter-date');
+    if (dateIn) dateIn.value = '';
+
+    // Slider auf dynamischen Maximalwert zurücksetzen
+    if (priceSlider) priceSlider.value = maxEventPrice;
+    const priceVal = document.getElementById('price-value');
+    if (priceVal) priceVal.textContent = maxEventPrice;
+
+    const locSelect = document.getElementById('filter-location');
+    if (locSelect) locSelect.selectedIndex = 0;
+
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) sortSelect.selectedIndex = 0;
+
+    // Checkboxen abwählen
+    document.querySelectorAll('.form-field input[type="checkbox"], .category-filter-group input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+    });
+
+    // Top-Leiste auf 'Alle'
+    document.querySelectorAll('.category-bar__link').forEach(l => l.classList.remove('category-bar__link--active'));
+    const allLink = document.querySelector('.category-bar__link');
+    if (allLink) allLink.classList.add('category-bar__link--active');
+    activeTopCategory = 'Alle';
+
+    applyFilters();
   });
 });
