@@ -93,10 +93,16 @@
         <section>
           <div class="catalog-header">
             <h1 id="event-count-heading">Veranstaltungen</h1>
-            <select style="width: auto; margin: 0">
-              <option>Nach Datum</option>
-              <option>Nach Preis</option>
-            </select>
+
+            <div class="sort-control">
+              <span class="sort-control__label">Sortieren nach:</span>
+              <select id="sort-select" class="sort-control__select">
+                <option value="date-asc">Datum (nächstes zuerst)</option>
+                <option value="date-desc">Datum (spätestes zuerst)</option>
+                <option value="price-asc">Preis (günstigste zuerst)</option>
+                <option value="price-desc">Preis (höchste zuerst)</option>
+              </select>
+            </div>
           </div>
 
           <div id="events-container">
