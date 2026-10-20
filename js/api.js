@@ -64,7 +64,7 @@ export function setupNavigation() {
       a.id = 'nav-cart-link';
       a.className = 'nav-menu__link nav-menu__cart';
       a.innerHTML = `
-        🛒 Warenkorb
+        Warenkorb
         <span id="cart-badge" class="cart-badge" style="display: none;">0</span>
       `;
       navMenu.insertBefore(a, navMenu.firstChild);
