@@ -44,7 +44,12 @@ export function art(c, s = 0) {
 export function paint() {
   document.querySelectorAll('.media-placeholder').forEach((el) => {
     const category = el.dataset.art || (el.classList.contains('hero-banner') ? 'Festivals' : 'Konzerte');
-    el.style.backgroundImage = `url("${art(category, +el.dataset.seed || 0)}")`;
+    if (el.classList.contains('hero-banner')) {
+  el.style.backgroundImage =
+    'url("https://cdn.pixabay.com/photo/2016/10/29/09/50/abstract-1780253_1280.png")';
+} else {
+  el.style.backgroundImage = `url("${art(category, +el.dataset.seed || 0)}")`;
+}
   });
 }
 
