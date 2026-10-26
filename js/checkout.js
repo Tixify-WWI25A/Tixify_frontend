@@ -280,7 +280,10 @@ function initPayPal() {
 
   window.paypal.Buttons({
     createOrder: async () => {
-      try { } catch (err) {
+      try {
+        const res = await apiRequest('/orders', { method: 'POST' });
+        return res.paypalOrderId;
+      } catch (err) {
         showToast(err.message || 'PayPal Order konnte nicht erstellt werden.', 'error');
         throw err;
       }
