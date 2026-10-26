@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tixify – Login / Registrieren</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body>
-<header class="site-header">
-  <div class="site-header__container">
-    <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
-    <nav class="nav-menu">
-      <a href="index.html" class="nav-menu__link">Event-Suche</a>
-      <a href="login.html" class="nav-menu__link nav-menu__link--active">Login / Registrieren</a>
-    </nav>
-  </div>
-</header>
-
-<main class="page-container">
-  <div class="grid-auth-split">
-    <div class="card-box form-field">
-      <h2>Anmelden</h2>
-      <form id="login-form">
-        <label for="login-email">E-Mail-Adresse</label>
-        <input type="email" id="login-email" required>
-
-        <label for="login-password">Passwort</label>
-        <input type="password" id="login-password" required>
-
-        <button type="submit" class="button button--full">Anmelden</button>
-      </form>
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-menu__link">Event-Suche</a>
+        <a href="login.html" class="nav-menu__link nav-menu__link--active">Login / Registrieren</a>
+      </nav>
     </div>
+  </header>
 
-    <div class="card-box form-field">
-      <h2>Neu bei Tixify?</h2>
-      <form id="register-form">
-        <label for="reg-username">Benutzername</label>
-        <input type="text" id="reg-username" required>
+  <main class="page-container">
+    <div class="grid-auth-split">
+      <div class="card-box form-field">
+        <h2>Anmelden</h2>
+        <form id="login-form">
+          <label for="login-email">E-Mail-Adresse</label>
+          <input type="email" id="login-email" required>
 
-        <label for="reg-email">E-Mail-Adresse</label>
-        <input type="email" id="reg-email" required>
+          <label for="login-password">Passwort</label>
+          <input type="password" id="login-password" required>
 
-        <label for="reg-password">Passwort</label>
-        <input type="password" id="reg-password" required minlength="6">
-
-        <button type="submit" class="button button--outline button--full">Konto erstellen</button>
-      </form>
-    </div>
+          <button type="submit" class="button button--full">Anmelden</button>
+        </form>
       </div>
-</main>
-<script type="module" src="js/login.js"></script>
+
+      <div class="card-box form-field">
+        <h2>Neu bei Tixify?</h2>
+        <form id="register-form">
+          <label for="reg-username">Benutzername</label>
+          <input type="text" id="reg-username" required>
+
+          <label for="reg-email">E-Mail-Adresse</label>
+          <input type="email" id="reg-email" required>
+
+          <label for="reg-password">Passwort</label>
+          <input type="password" id="reg-password" required minlength="8">
+
+          <button type="submit" class="button button--outline button--full">Konto erstellen</button>
+        </form>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="js/login.js"></script>
 </body>
+
 </html>
