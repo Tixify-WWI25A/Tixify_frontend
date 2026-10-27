@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta name="robots" content="noindex, nofollow" />
+     ⁠
     <title>Tixify – Events</title>
     <link
       rel="stylesheet"
@@ -56,18 +59,30 @@
           <!-- Moderne Filter-Chips in der Sidebar -->
           <label>Kategorie</label>
           <div class="category-filter-group">
-            <label class="category-chip"><input type="checkbox" value="Konzerte" /> Konzerte</label>
-            <label class="category-chip"><input type="checkbox" value="Festivals" /> Festivals</label>
-            <label class="category-chip"><input type="checkbox" value="Sport" /> Sport</label>
-            <label class="category-chip"><input type="checkbox" value="Theater" /> Theater</label>
-            <label class="category-chip"><input type="checkbox" value="Comedy" /> Comedy</label>
+            <label class="category-chip"
+              ><input type="checkbox" value="Konzerte" /> Konzerte</label
+            >
+            <label class="category-chip"
+              ><input type="checkbox" value="Festivals" /> Festivals</label
+            >
+            <label class="category-chip"
+              ><input type="checkbox" value="Sport" /> Sport</label
+            >
+            <label class="category-chip"
+              ><input type="checkbox" value="Theater" /> Theater</label
+            >
+            <label class="category-chip"
+              ><input type="checkbox" value="Comedy" /> Comedy</label
+            >
           </div>
 
           <label for="filter-date">Ab Datum</label>
           <input type="date" id="filter-date" />
 
           <label for="filter-location">Ort</label>
-          <select id="filter-location"><option>Alle Orte</option></select>
+          <select id="filter-location">
+            <option>Alle Orte</option>
+          </select>
 
           <label for="filter-price"
             >Preis bis <b id="price-value">150</b> €</label
