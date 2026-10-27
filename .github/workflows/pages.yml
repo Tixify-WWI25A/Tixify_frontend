@@ -1,0 +1,51 @@
+# Veröffentlicht die MPA auf GitHub Pages (statische Seiten, kein Build nötig).
+# KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt, vom Team geprüft (KI-Log Nr. 17).
+name: MPA auf GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # manuell starten: Actions → "MPA auf GitHub Pages" → Run workflow
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v4
+
+      # Nur die Dateien der Website veröffentlichen – keine Notizen, Editor-Einstellungen o. Ä.
+      - name: Website-Dateien zusammenstellen
+        run: |
+          mkdir _site
+          cp *.html _site/
+          cp -r css js _site/
+          [ -d fonts ] && cp -r fonts _site/ || true
+          [ -d img ] && cp -r img _site/ || true
+          # alte, nicht mehr verlinkte Seiten nicht mit veröffentlichen
+          rm -f _site/cart.html _site/register.html _site/admin.html _site/js/app.js
+          ls -R _site
+
+      - name: Pages einrichten
+        uses: actions/configure-pages@v5
+
+      - name: Dateien hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v4
