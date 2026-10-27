@@ -1,290 +1,252 @@
-import { apiRequest, setupNavigation } from './api.js';
-import { art, showToast } from '../js/common.js';
+/*
+ * Tixify MPA – Kasse: Warenkorb, Ticketinhaber, PayPal-Sandbox, Bestätigung.
+ * KI-Kennzeichnung: Überarbeitung von Aufbau und Darstellung (Fortschrittsanzeige,
+ * Warenkorbliste, Übersicht mit Weiter-Button, mobile Summenleiste), Escaping der
+ * Vorlagen und die PayPal-Ladeprüfung wurden mit Unterstützung von Claude (Anthropic)
+ * erstellt und vom Team geprüft (KI-Log Nr. 17).
+ * Unser Code: Ablauf createOrder (POST /orders → paypalOrderId) und onApprove (Capture).
+ */
+import { apiRequest, setupNavigation, getSession, updateCartBadge } from './api.js';
+import { art, showToast, escapeHtml, cssUrl } from './common.js';
+
+const MAX_PER_EVENT = 5; // gleiche Grenze wie MAX_TICKETS_PER_EVENT in tixify-orders
 
 let cartData = { items: [] };
-let currentUser = null;
+let currentStep = 1;
 let isUpdating = false;
 
+const euro = (value) => `${(parseFloat(value) || 0).toFixed(2).replace('.', ',')} €`;
+const $ = (id) => document.getElementById(id);
+
+function formatEventDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+}
+
 async function initCheckout() {
-  const token = localStorage.getItem('token') || localStorage.getItem('tixify_token');
-  if (!token) {
+  if (!getSession()) {
     showToast('Bitte melde dich an, um zur Kasse zu gehen.', 'error');
-    window.location.href = 'login.html';
+    setTimeout(() => { window.location.href = 'login.html'; }, 1000);
     return;
   }
 
-  await loadUserData();
-  await loadCart();
+  loadUserData();
   initStepNavigation();
+  await loadCart();
   initPayPal();
 }
 
-async function loadUserData() {
-  const nameDisplay = document.getElementById('billing-name-display');
-  const emailDisplay = document.getElementById('billing-email-display');
-  const avatarElem = document.getElementById('billing-avatar');
-  const nameInput = document.getElementById('billing-name');
-  const emailInput = document.getElementById('billing-email');
+function loadUserData() {
+  const user = getSession()?.user || {};
+  const userName = user.name || user.username || user.email?.split('@')[0] || 'Kunde';
+  const userEmail = user.email || 'Keine E-Mail hinterlegt';
 
-  try {
-    const userRaw = localStorage.getItem('user') || localStorage.getItem('tixify_user');
-    if (userRaw && userRaw !== 'null' && userRaw !== 'undefined') {
-      try {
-        currentUser = JSON.parse(userRaw);
-      } catch (e) {
-        currentUser = null;
-      }
-    }
+  $('billing-name-display').textContent = userName;
+  $('billing-email-display').textContent = userEmail;
+  $('billing-avatar').textContent = userName.trim().charAt(0).toUpperCase() || 'K';
+  $('billing-name').value = userName;
+  $('billing-email').value = userEmail;
+}
 
-    if (!currentUser) {
-      const token = localStorage.getItem('token') || localStorage.getItem('tixify_token');
-      if (token && token.includes('.')) {
-        const payloadBase64 = token.split('.')[1];
-        currentUser = JSON.parse(atob(payloadBase64));
-      }
-    }
+function setProceedEnabled(enabled) {
+  ['btn-to-payment', 'btn-to-payment-mobile'].forEach((id) => {
+    const btn = $(id);
+    if (btn) btn.disabled = !enabled;
+  });
+}
 
-    const userName = currentUser?.name || currentUser?.username || currentUser?.email?.split('@')[0] || 'Kunde';
-    const userEmail = currentUser?.email || 'Keine E-Mail hinterlegt';
-    const initialLetter = userName.trim().charAt(0).toUpperCase() || 'K';
-
-    if (nameDisplay) nameDisplay.textContent = userName;
-    if (emailDisplay) emailDisplay.textContent = userEmail;
-    if (avatarElem) avatarElem.textContent = initialLetter;
-
-    if (nameInput) nameInput.value = userName;
-    if (emailInput) emailInput.value = userEmail;
-
-  } catch (err) {
-    console.warn('Benutzerdaten konnten nicht geladen werden:', err);
-    if (nameDisplay) nameDisplay.textContent = 'Kunde';
-    if (emailDisplay) emailDisplay.textContent = '';
-    if (avatarElem) avatarElem.textContent = 'K';
-  }
+function renderEmptyCart() {
+  $('cart-items-container').innerHTML = `
+    <div class="card-box cart-empty">
+      <div class="cart-empty__icon" aria-hidden="true">🎟️</div>
+      <h3>Dein Warenkorb ist leer</h3>
+      <p class="text-muted">Such dir ein Event aus und leg Tickets in den Warenkorb.</p>
+      <a href="index.html" class="button">Events entdecken</a>
+    </div>`;
+  $('order-summary-list').innerHTML = '<p class="text-muted">Noch keine Tickets ausgewählt.</p>';
+  $('order-total-price').textContent = euro(0);
+  $('mobilebar-total').textContent = euro(0);
+  $('cart-count').textContent = '';
+  setProceedEnabled(false);
+  updateMobileBar();
 }
 
 async function loadCart() {
-  const cartContainer = document.getElementById('cart-items-container');
-  const summaryContainer = document.getElementById('order-summary-list');
-  const totalPriceElem = document.getElementById('order-total-price');
-  const proceedBtn = document.getElementById('btn-to-payment');
-
   try {
-    const res = await apiRequest('/cart');
-    cartData = res || { items: [] };
-
-    if (!cartData.items || cartData.items.length === 0) {
-      if (cartContainer) {
-        cartContainer.innerHTML = `
-          <div style="padding: 24px 0; text-align: center;">
-            <p class="text-muted" style="margin-bottom: 16px;">Dein Warenkorb ist derzeit leer.</p>
-            <a href="index.html" class="button">Jetzt Events entdecken</a>
-          </div>
-        `;
-      }
-      if (summaryContainer) summaryContainer.innerHTML = '<p class="text-muted">Keine Artikel im Korb</p>';
-      if (totalPriceElem) totalPriceElem.textContent = '0,00 €';
-      if (proceedBtn) proceedBtn.disabled = true;
-      return;
-    }
-
-    if (proceedBtn) proceedBtn.disabled = false;
-
-    let grandTotal = 0;
-
-    if (cartContainer) {
-      cartContainer.innerHTML = cartData.items.map(item => {
-        const itemTotal = parseFloat(item.price) * item.quantity;
-        grandTotal += itemTotal;
-        const imgUrl = item.logo_url || art(item.category || 'Konzerte', item.event_id);
-
-        return `
-          <div class="cart-item-row" id="cart-row-${item.event_id}" data-event-id="${item.event_id}">
-            <div class="cart-item-img" style="background-image: url('${imgUrl}');"></div>
-            <div>
-              <b style="font-size: 15px;">${item.title}</b><br>
-              <span class="text-muted">${item.location || 'Ohne Ortsangabe'} · Einzelpreis: ${parseFloat(item.price).toFixed(2).replace('.', ',')} €</span>
-            </div>
-            <div class="quantity-control" style="margin: 0;">
-              <button type="button" class="btn-qty-minus" data-id="${item.event_id}">−</button>
-              <span class="qty-display" data-id="${item.event_id}">${item.quantity}</span>
-              <button type="button" class="btn-qty-plus" data-id="${item.event_id}">+</button>
-            </div>
-            <div class="item-total-price" data-id="${item.event_id}" style="font-weight: 700; min-width: 80px; text-align: right;">
-              ${itemTotal.toFixed(2).replace('.', ',')} €
-            </div>
-            <div>
-              <button type="button" class="btn-delete-item" data-id="${item.event_id}">Löschen</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    if (summaryContainer) {
-      summaryContainer.innerHTML = cartData.items.map(item => `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <div>
-            <div>${item.title}</div>
-            <small class="text-muted">${item.quantity} × ${parseFloat(item.price).toFixed(2).replace('.', ',')} €</small>
-          </div>
-          <div style="font-weight: 600;">
-            ${(parseFloat(item.price) * item.quantity).toFixed(2).replace('.', ',')} €
-          </div>
-        </div>
-      `).join('');
-    }
-
-    if (totalPriceElem) {
-      totalPriceElem.textContent = `${grandTotal.toFixed(2).replace('.', ',')} €`;
-    }
-
-    attachCartItemEvents();
+    cartData = (await apiRequest('/cart')) || { items: [] };
   } catch (err) {
     console.error('Fehler beim Abrufen des Warenkorbs:', err);
-    if (cartContainer) cartContainer.innerHTML = `<p style="color: red;">Fehler: ${err.message}</p>`;
+    $('cart-items-container').innerHTML = `<div class="card-box"><p class="text-error">Warenkorb konnte nicht geladen werden: ${escapeHtml(err.message)}</p></div>`;
+    setProceedEnabled(false);
+    return;
   }
+
+  const items = cartData.items || [];
+  if (items.length === 0) {
+    renderEmptyCart();
+    updateCartBadge();
+    return;
+  }
+
+  const grandTotal = items.reduce((sum, i) => sum + (parseFloat(i.price) || 0) * i.quantity, 0);
+  const ticketCount = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  $('cart-items-container').innerHTML = items.map((item) => {
+    const id = escapeHtml(item.event_id);
+    const title = escapeHtml(item.title);
+    const imageStyle = cssUrl(item.logo_url, art(item.category || 'Konzerte', item.event_id));
+    const maxQty = Math.min(MAX_PER_EVENT, Number(item.event_stock) || MAX_PER_EVENT);
+    const meta = [formatEventDate(item.event_date), item.location || 'Ohne Ortsangabe'].filter(Boolean).map(escapeHtml).join(' · ');
+
+    return `
+      <article class="cart-item" data-event-id="${id}">
+        <a href="detail.html?id=${encodeURIComponent(item.event_id)}" class="cart-item__img" style="background-image: ${escapeHtml(imageStyle)};" aria-label="Details zu ${title}"></a>
+        <div class="cart-item__info">
+          <a href="detail.html?id=${encodeURIComponent(item.event_id)}" class="cart-item__title">${title}</a>
+          <span class="text-muted">${meta}</span>
+          <span class="text-muted">${euro(item.price)} pro Ticket</span>
+        </div>
+        <div class="cart-item__controls">
+          <div class="quantity-control" role="group" aria-label="Anzahl Tickets für ${title}">
+            <button type="button" class="btn-qty-minus" data-id="${id}" aria-label="Ein Ticket weniger">−</button>
+            <span class="qty-display" aria-live="polite">${escapeHtml(item.quantity)}</span>
+            <button type="button" class="btn-qty-plus" data-id="${id}" aria-label="Ein Ticket mehr" ${item.quantity >= maxQty ? 'disabled' : ''}>+</button>
+          </div>
+          <button type="button" class="btn-delete-item" data-id="${id}">Entfernen</button>
+        </div>
+        <div class="cart-item__price">${euro((parseFloat(item.price) || 0) * item.quantity)}</div>
+      </article>`;
+  }).join('');
+
+  $('order-summary-list').innerHTML = items.map((item) => `
+    <div class="summary-item">
+      <div>
+        <div class="summary-item__title">${escapeHtml(item.title)}</div>
+        <small class="text-muted">${escapeHtml(item.quantity)} × ${euro(item.price)}</small>
+      </div>
+      <div class="summary-item__price">${euro((parseFloat(item.price) || 0) * item.quantity)}</div>
+    </div>`).join('');
+
+  $('cart-count').textContent = `${ticketCount} ${ticketCount === 1 ? 'Ticket' : 'Tickets'}`;
+  $('order-total-price').textContent = euro(grandTotal);
+  $('mobilebar-total').textContent = euro(grandTotal);
+  setProceedEnabled(true);
+  updateMobileBar();
+  attachCartItemEvents();
+  updateCartBadge();
 }
 
 function attachCartItemEvents() {
-  document.querySelectorAll('.btn-qty-minus').forEach(btn => {
-    btn.onclick = async (e) => {
-      e.preventDefault();
-      if (isUpdating) return;
-      const eventId = parseInt(e.currentTarget.dataset.id, 10);
-      const currentItem = cartData.items.find(i => i.event_id === eventId);
-      if (!currentItem) return;
+  const container = $('cart-items-container');
+  container.onclick = async (e) => {
+    const btn = e.target.closest('button[data-id]');
+    if (!btn || isUpdating) return;
+    const eventId = parseInt(btn.dataset.id, 10);
+    const item = cartData.items.find((i) => i.event_id === eventId);
+    if (!item) return;
 
-      if (currentItem.quantity > 1) {
-        await changeQuantity(eventId, currentItem.quantity - 1, -1);
-      } else {
-        await deleteCartItem(eventId);
-      }
-    };
-  });
-
-  document.querySelectorAll('.btn-qty-plus').forEach(btn => {
-    btn.onclick = async (e) => {
-      e.preventDefault();
-      if (isUpdating) return;
-      const eventId = parseInt(e.currentTarget.dataset.id, 10);
-      const currentItem = cartData.items.find(i => i.event_id === eventId);
-      if (!currentItem) return;
-
-      await changeQuantity(eventId, currentItem.quantity + 1, 1);
-    };
-  });
-
-  document.querySelectorAll('.btn-delete-item').forEach(btn => {
-    btn.onclick = async (e) => {
-      e.preventDefault();
-      if (isUpdating) return;
-      const eventId = parseInt(e.currentTarget.dataset.id, 10);
-      await deleteCartItem(eventId);
-    };
-  });
+    if (btn.classList.contains('btn-qty-plus')) await changeQuantity(eventId, 1);
+    else if (btn.classList.contains('btn-qty-minus')) {
+      if (item.quantity > 1) await changeQuantity(eventId, -1);
+      else await deleteCartItem(eventId, item.title);
+    } else if (btn.classList.contains('btn-delete-item')) await deleteCartItem(eventId, item.title);
+  };
 }
 
-async function changeQuantity(eventId, newQty, delta) {
+async function withLock(fn) {
   isUpdating = true;
-  disableControlButtons(true);
-
-  const qtyElem = document.querySelector(`.qty-display[data-id="${eventId}"]`);
-  if (qtyElem) qtyElem.textContent = newQty;
-
+  const container = $('cart-items-container');
+  container.setAttribute('aria-busy', 'true');
+  container.querySelectorAll('button').forEach((b) => { b.disabled = true; });
   try {
-    await apiRequest('/cart/items', {
-      method: 'POST',
-      body: JSON.stringify({
-        eventId,
-        quantity: newQty,
-        delta: delta
-      })
-    });
-
-    await loadCart();
-  } catch (err) {
-    showToast(err.message || 'Menge konnte nicht aktualisiert werden.', 'error');
-    await loadCart();
+    await fn();
   } finally {
     isUpdating = false;
-    disableControlButtons(false);
+    container.removeAttribute('aria-busy');
+    await loadCart();
   }
 }
 
-async function deleteCartItem(eventId) {
-  isUpdating = true;
-  disableControlButtons(true);
-
-  try {
-    await apiRequest(`/cart/items/${eventId}`, { method: 'DELETE' });
-    showToast('Artikel entfernt.', 'success');
-    await loadCart();
-  } catch (err) {
-    showToast(err.message || 'Konnte Artikel nicht löschen.', 'error');
-  } finally {
-    isUpdating = false;
-    disableControlButtons(false);
-  }
-}
-
-function disableControlButtons(disabled) {
-  document.querySelectorAll('.btn-qty-minus, .btn-qty-plus, .btn-delete-item').forEach(b => {
-    b.disabled = disabled;
-    b.style.opacity = disabled ? '0.5' : '1';
+function changeQuantity(eventId, delta) {
+  return withLock(async () => {
+    try {
+      await apiRequest('/cart/items', { method: 'POST', body: JSON.stringify({ eventId, delta }) });
+    } catch (err) {
+      showToast(err.message || 'Menge konnte nicht geändert werden.', 'error');
+    }
   });
 }
 
-function switchStep(stepIndex) {
-  [1, 2, 3].forEach(step => {
-    const tab = document.getElementById(`step-tab-${step}`);
-    const content = document.getElementById(`step-content-${step}`);
-    if (tab) {
-      if (step === stepIndex) {
-        tab.classList.add('checkout-steps__step--active');
-      } else {
-        tab.classList.remove('checkout-steps__step--active');
-      }
-    }
-    if (content) {
-      if (step === stepIndex) {
-        content.classList.add('is-active');
-      } else {
-        content.classList.remove('is-active');
-      }
+function deleteCartItem(eventId, title) {
+  return withLock(async () => {
+    try {
+      await apiRequest(`/cart/items/${eventId}`, { method: 'DELETE' });
+      showToast(`„${title}“ entfernt.`, 'success');
+    } catch (err) {
+      showToast(err.message || 'Konnte Artikel nicht entfernen.', 'error');
     }
   });
+}
+
+function updateMobileBar() {
+  const bar = $('checkout-mobilebar');
+  if (bar) bar.hidden = currentStep !== 1 || !(cartData.items || []).length;
+}
+
+function switchStep(step) {
+  currentStep = step;
+  [1, 2, 3].forEach((n) => {
+    const tab = $(`step-tab-${n}`);
+    tab.classList.toggle('is-active', n === step);
+    tab.classList.toggle('is-done', n < step);
+    if (n === step) tab.setAttribute('aria-current', 'step');
+    else tab.removeAttribute('aria-current');
+    $(`step-content-${n}`).classList.toggle('is-active', n === step);
+  });
+
+  // Weiter-Button nur im Warenkorb; nach dem Kauf keine Übersicht mehr
+  $('btn-to-payment').hidden = step !== 1;
+  $('checkout-layout').classList.toggle('is-finished', step === 3);
+  updateMobileBar();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  $(`step-content-${step}`).querySelector('h2')?.focus?.();
+}
+
+function goToPayment() {
+  if (!cartData.items || cartData.items.length === 0) {
+    showToast('Dein Warenkorb ist leer.', 'error');
+    return;
+  }
+  switchStep(2);
 }
 
 function initStepNavigation() {
-  document.getElementById('btn-to-payment')?.addEventListener('click', () => {
-    if (!cartData.items || cartData.items.length === 0) {
-      showToast('Dein Warenkorb ist leer!', 'error');
-      return;
-    }
-    switchStep(2);
-  });
-
-  document.getElementById('btn-back-to-cart')?.addEventListener('click', () => {
-    switchStep(1);
-  });
+  $('btn-to-payment')?.addEventListener('click', goToPayment);
+  $('btn-to-payment-mobile')?.addEventListener('click', goToPayment);
+  $('btn-back-to-cart')?.addEventListener('click', () => switchStep(1));
 }
 
 function initPayPal() {
-  const container = document.getElementById('paypal-button-container');
-  if (!container || !window.paypal) return;
+  const container = $('paypal-button-container');
+  if (!container) return;
+  if (!window.paypal) {
+    container.innerHTML = '<p class="text-error">PayPal konnte nicht geladen werden. Bitte Seite neu laden oder Werbeblocker prüfen.</p>';
+    return;
+  }
 
   container.innerHTML = '';
 
   window.paypal.Buttons({
+    style: { layout: 'vertical', shape: 'rect', label: 'pay' },
     createOrder: async () => {
       try {
         const res = await apiRequest('/orders', { method: 'POST' });
         return res.paypalOrderId;
       } catch (err) {
-        showToast(err.message || 'PayPal Order konnte nicht erstellt werden.', 'error');
+        showToast(err.message || 'PayPal-Bestellung konnte nicht erstellt werden.', 'error');
         throw err;
       }
     },
@@ -295,16 +257,21 @@ function initPayPal() {
           body: JSON.stringify({ paypalOrderId: data.orderID })
         });
 
-        document.getElementById('confirmed-order-id').textContent = `#${res.orderId}`;
+        $('confirmed-order-id').textContent = `#${res.orderId}`;
         showToast('Zahlung erfolgreich abgeschlossen!', 'success');
+        cartData = { items: [] };
+        updateCartBadge();
         switchStep(3);
       } catch (err) {
         showToast(err.message || 'Zahlung konnte nicht verarbeitet werden.', 'error');
       }
     },
+    onCancel: () => {
+      showToast('Zahlung abgebrochen – dein Warenkorb ist noch da.', 'error');
+    },
     onError: (err) => {
-      console.error('PayPal Error:', err);
-      showToast('Zahlungsvorgang abgebrochen oder fehlgeschlagen.', 'error');
+      console.error('PayPal-Fehler:', err);
+      showToast('Zahlung fehlgeschlagen. Bitte erneut versuchen.', 'error');
     }
   }).render('#paypal-button-container');
 }

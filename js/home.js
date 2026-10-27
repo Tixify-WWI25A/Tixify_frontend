@@ -1,5 +1,10 @@
+/*
+ * Tixify MPA – Startseite: Eventliste, Filter, Sortierung, Seiten.
+ * KI-Kennzeichnung: Das Escaping der Kartenvorlage (escapeHtml/cssUrl) wurde mit
+ * Unterstützung von Claude (Anthropic) ergänzt und vom Team geprüft (KI-Log Nr. 17).
+ */
 import { apiRequest, setupNavigation } from "./api.js";
-import { art } from "../js/common.js";
+import { art, escapeHtml, cssUrl } from "./common.js";
 
 let allEvents = [];
 let activeTopCategory = "Alle";
@@ -36,7 +41,7 @@ async function loadEvents() {
     }
   } catch (err) {
     if (listContainer) {
-      listContainer.innerHTML = `<div class="card-box">Fehler beim Laden: ${err.message}</div>`;
+      listContainer.innerHTML = `<div class="card-box">Fehler beim Laden: ${escapeHtml(err.message)}</div>`;
     }
   }
 }
@@ -75,7 +80,7 @@ function populateLocationDropdown(events) {
   const uniqueLocations = [...new Set(events.map(e => e.location).filter(Boolean))].sort();
 
   locSelect.innerHTML = '<option value="Alle Orte">Alle Orte</option>' +
-    uniqueLocations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+    uniqueLocations.map(loc => `<option value="${escapeHtml(loc)}">${escapeHtml(loc)}</option>`).join('');
 }
 
 /**
@@ -112,7 +117,7 @@ function applyFilters() {
 
     // 1. Suche über Suchfeld (Titel, Ort, Kategorie)
     const matchesSearch = !search || title.includes(search) || loc.includes(search) || cat.includes(search);
-      
+
     // 2. Namensfilter aus der Sidebar
     const matchesName = !nameFilter || title.includes(nameFilter);
 
@@ -191,33 +196,34 @@ function renderEventsList(events) {
     const priceFormatted = parseFloat(e.price).toFixed(2).replace('.', ',');
 
     const isSoldOut = e.event_stock === 0;
-    const badgeWarning = isSoldOut 
-      ? '<span class="badge badge--warning">Ausverkauft</span>' 
-      : (e.event_stock < 10 ? `<span class="badge badge--warning">Nur noch ${e.event_stock}</span>` : '');
+    const badgeWarning = isSoldOut
+      ? '<span class="badge badge--warning">Ausverkauft</span>'
+      : (e.event_stock < 10 ? `<span class="badge badge--warning">Nur noch ${escapeHtml(e.event_stock)}</span>` : '');
 
     const eventCategory = e.category || 'Event';
-    const categoryClass = 'badge--' + eventCategory.toLowerCase().trim();
+    const categoryClass = 'badge--' + String(eventCategory).toLowerCase().trim().replace(/[^a-z0-9äöüß-]/g, '');
 
     // Eigene logo_url bevorzugen, sonst Fallback auf das generierte SVG art()
-    const imageUrl = e.logo_url || art(eventCategory, e.event_id);
+    const fallbackArt = art(eventCategory, e.event_id);
+    const imageStyle = cssUrl(e.logo_url, fallbackArt);
 
     return `
-      <a href="detail.html?id=${e.event_id}" class="event-card">
-        <div class="media-placeholder event-card__thumbnail" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;"></div>
+      <a href="detail.html?id=${encodeURIComponent(e.event_id)}" class="event-card">
+        <div class="media-placeholder event-card__thumbnail" style="background-image: ${escapeHtml(imageStyle)}; background-size: cover; background-position: center;" role="img" aria-label="Eventbild"></div>
         <div class="event-card__date">
           <b>${day}</b><small>${month}</small>
         </div>
         <div>
-          <h3>${e.title}</h3>
-          <div class="text-muted">${e.location || 'Ohne Ortsangabe'} · ${time} Uhr</div>
+          <h3>${escapeHtml(e.title)}</h3>
+          <div class="text-muted">${escapeHtml(e.location || 'Ohne Ortsangabe')} · ${time} Uhr</div>
           <div style="margin-top: 6px;">
-            <span class="badge ${categoryClass}">${eventCategory}</span>
+            <span class="badge ${categoryClass}">${escapeHtml(eventCategory)}</span>
             ${badgeWarning}
           </div>
         </div>
         <div class="event-card__pricing">
           <b>ab ${priceFormatted} €</b>
-          <button class="button button--small" ${isSoldOut ? 'disabled style="opacity:.4"' : ''}>Tickets</button>
+          <span class="button button--small${isSoldOut ? ' is-disabled' : ''}" aria-hidden="true">${isSoldOut ? 'Ausverkauft' : 'Tickets'}</span>
         </div>
       </a>
     `;

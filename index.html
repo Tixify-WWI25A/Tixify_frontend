@@ -1,172 +1,142 @@
 <!doctype html>
 <html lang="de">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <meta name="robots" content="noindex, nofollow" />
-     ⁠
-    <title>Tixify – Events</title>
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
-    />
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
-  <body>
-    <div class="study-banner" role="note">
-      Studienprojekt der DHBW – kein echter Ticketverkauf. Zahlungen laufen über
-      die PayPal-Sandbox, es fließt kein echtes Geld. Bitte keine echten
-      persönlichen Daten eingeben.
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Tixify – Events</title>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="study-banner" role="note">
+    Studienprojekt der DHBW – kein echter Ticketverkauf. Zahlungen laufen über
+    die PayPal-Sandbox, es fließt kein echtes Geld. Bitte keine echten
+    persönlichen Daten eingeben.
+  </div>
+
+  <header class="site-header">
+    <div class="site-header__container">
+      <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
+      <div class="search-bar">
+        <input id="search-input" class="search-bar__input" placeholder="Event, Künstler oder Ort suchen" />
+        <button class="button" id="search-button">Suchen</button>
+      </div>
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-menu__link nav-menu__link--active">Event-Suche</a>
+        <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
+        <a href="login.html" class="nav-menu__link">Login / Registrieren</a>
+      </nav>
     </div>
 
-    <header class="site-header">
-      <div class="site-header__container">
-        <a href="index.html" class="brand-logo">Tix<i>ify</i></a>
-        <div class="search-bar">
-          <input
-            id="search-input"
-            class="search-bar__input"
-            placeholder="Event, Künstler oder Ort suchen"
-          />
-          <button class="button" id="search-button">Suchen</button>
+    <div class="category-bar">
+      <a class="category-bar__link category-bar__link--active">Alle</a>
+      <a class="category-bar__link">Konzerte</a>
+      <a class="category-bar__link">Festivals</a>
+      <a class="category-bar__link">Sport</a>
+      <a class="category-bar__link">Theater</a>
+      <a class="category-bar__link">Comedy</a>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <div class="hero-banner media-placeholder" data-art="Festivals"></div>
+
+    <div class="grid-catalog">
+      <!-- Filter Sidebar -->
+      <aside class="card-box form-field" style="align-self: start">
+        <h3>Filter</h3>
+
+        <label for="filter-title">Name</label>
+        <input type="text" id="filter-title" placeholder="z. B. Lumen" />
+
+        <!-- Moderne Filter-Chips in der Sidebar -->
+        <label>Kategorie</label>
+        <div class="category-filter-group">
+          <label class="category-chip"><input type="checkbox" value="Konzerte" /> Konzerte</label>
+          <label class="category-chip"><input type="checkbox" value="Festivals" /> Festivals</label>
+          <label class="category-chip"><input type="checkbox" value="Sport" /> Sport</label>
+          <label class="category-chip"><input type="checkbox" value="Theater" /> Theater</label>
+          <label class="category-chip"><input type="checkbox" value="Comedy" /> Comedy</label>
         </div>
-        <nav class="nav-menu">
-          <a href="index.html" class="nav-menu__link nav-menu__link--active"
-            >Event-Suche</a
-          >
-          <a href="bookings.html" class="nav-menu__link">Meine Buchungen</a>
-          <a href="admin.html" class="nav-menu__link">Eventverwaltung</a>
-          <a href="login.html" class="nav-menu__link">Login / Registrieren</a>
-        </nav>
-      </div>
 
-      <div class="category-bar">
-        <a class="category-bar__link category-bar__link--active">Alle</a>
-        <a class="category-bar__link">Konzerte</a>
-        <a class="category-bar__link">Festivals</a>
-        <a class="category-bar__link">Sport</a>
-        <a class="category-bar__link">Theater</a>
-        <a class="category-bar__link">Comedy</a>
-      </div>
-    </header>
+        <label for="filter-date">Ab Datum</label>
+        <input type="date" id="filter-date" />
 
-    <main class="page-container">
-      <div class="hero-banner media-placeholder" data-art="Festivals"></div>
+        <label for="filter-location">Ort</label>
+        <select id="filter-location">
+          <option>Alle Orte</option>
+        </select>
 
-      <div class="grid-catalog">
-        <!-- Filter Sidebar -->
-        <aside class="card-box form-field" style="align-self: start">
-          <h3>Filter</h3>
+        <label for="filter-price">Preis bis <b id="price-value">150</b> €</label>
+        <input type="range" id="filter-price" min="10" max="150" value="150"
+          style="accent-color: var(--color-primary)" />
 
-          <label for="filter-title">Name</label>
-          <input type="text" id="filter-title" placeholder="z. B. Lumen" />
+        <button class="button button--outline button--full" id="btn-reset-filter" style="margin-top: 10px">
+          Filter zurücksetzen
+        </button>
+      </aside>
 
-          <!-- Moderne Filter-Chips in der Sidebar -->
-          <label>Kategorie</label>
-          <div class="category-filter-group">
-            <label class="category-chip"
-              ><input type="checkbox" value="Konzerte" /> Konzerte</label
-            >
-            <label class="category-chip"
-              ><input type="checkbox" value="Festivals" /> Festivals</label
-            >
-            <label class="category-chip"
-              ><input type="checkbox" value="Sport" /> Sport</label
-            >
-            <label class="category-chip"
-              ><input type="checkbox" value="Theater" /> Theater</label
-            >
-            <label class="category-chip"
-              ><input type="checkbox" value="Comedy" /> Comedy</label
-            >
-          </div>
+      <section>
+        <div class="catalog-header">
+          <h1 id="event-count-heading">Veranstaltungen</h1>
 
-          <label for="filter-date">Ab Datum</label>
-          <input type="date" id="filter-date" />
-
-          <label for="filter-location">Ort</label>
-          <select id="filter-location">
-            <option>Alle Orte</option>
-          </select>
-
-          <label for="filter-price"
-            >Preis bis <b id="price-value">150</b> €</label
-          >
-          <input
-            type="range"
-            id="filter-price"
-            min="10"
-            max="150"
-            value="150"
-            style="accent-color: var(--color-primary)"
-          />
-
-          <button
-            class="button button--outline button--full"
-            id="btn-reset-filter"
-            style="margin-top: 10px"
-          >
-            Filter zurücksetzen
-          </button>
-        </aside>
-
-        <section>
-          <div class="catalog-header">
-            <h1 id="event-count-heading">Veranstaltungen</h1>
-
-            <div class="sort-control">
-              <span class="sort-control__label">Sortieren nach:</span>
-              <select id="sort-select" class="sort-control__select">
-                <option value="date-asc">Datum (nächstes zuerst)</option>
-                <option value="date-desc">Datum (spätestes zuerst)</option>
-                <option value="price-asc">Preis (günstigste zuerst)</option>
-                <option value="price-desc">Preis (höchste zuerst)</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="events-container">
-            <!-- Wird dynamisch durch home.js befüllt -->
-          </div>
-          <div class="pagination-bar" id="pagination-container"></div>
-        </section>
-      </div>
-    </main>
-
-    <footer class="site-footer">
-      <div class="site-footer__content">
-        <div>
-          <div class="brand-logo" style="color: #fff">Tix<i>ify</i></div>
-          <p>
-            Events finden, Tickets sicher buchen und sofort per E-Mail erhalten.
-          </p>
-        </div>
-        <div>
-          <h4>Impressum</h4>
-          <a>Anbieterkennzeichnung</a><a>Datenschutz</a><a>AGB</a>
-        </div>
-        <div>
-          <h4>Kontakt</h4>
-          <a>kontakt@tixify.example</a><a>Tel. 0711 123 456 0</a>
-        </div>
-        <div>
-          <h4>Support</h4>
-          <a>Häufige Fragen</a><a>Ticket nicht erhalten?</a>
-        </div>
-        <div>
-          <h4>Bezahlarten</h4>
-          <div class="payment-methods">
-            <span>PayPal</span><span>Kreditkarte</span>
+          <div class="sort-control">
+            <span class="sort-control__label">Sortieren nach:</span>
+            <select id="sort-select" class="sort-control__select">
+              <option value="date-asc">Datum (nächstes zuerst)</option>
+              <option value="date-desc">Datum (spätestes zuerst)</option>
+              <option value="price-asc">Preis (günstigste zuerst)</option>
+              <option value="price-desc">Preis (höchste zuerst)</option>
+            </select>
           </div>
         </div>
-      </div>
-      <div class="site-footer__bottom">
-        © 2026 Tixify · Fallstudie Software Engineering, WWI25A
-      </div>
-    </footer>
 
-    <script type="module" src="js/common.js"></script>
-    <script type="module" src="js/home.js"></script>
-  </body>
+        <div id="events-container">
+          <!-- Wird dynamisch durch home.js befüllt -->
+        </div>
+        <div class="pagination-bar" id="pagination-container"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <div>
+        <div class="brand-logo" style="color: #fff">Tix<i>ify</i></div>
+        <p>
+          Events finden, Tickets sicher buchen und sofort per E-Mail erhalten.
+        </p>
+      </div>
+      <div>
+        <h4>Impressum</h4>
+        <a>Anbieterkennzeichnung</a><a>Datenschutz</a><a>AGB</a>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <a>kontakt@tixify.example</a><a>Tel. 0711 123 456 0</a>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <a>Häufige Fragen</a><a>Ticket nicht erhalten?</a>
+      </div>
+      <div>
+        <h4>Bezahlarten</h4>
+        <div class="payment-methods">
+          <span>PayPal</span><span>Kreditkarte</span>
+        </div>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      © 2026 Tixify · Fallstudie Software Engineering, WWI25A
+    </div>
+  </footer>
+
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/home.js"></script>
+</body>
+
 </html>

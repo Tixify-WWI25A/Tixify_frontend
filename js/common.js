@@ -1,3 +1,40 @@
+/*
+ * Tixify MPA – gemeinsame Hilfsfunktionen (Bilder, Suche, Toasts, Escaping).
+ * KI-Kennzeichnung: escapeHtml, safeUrl, cssUrl und die textContent-Umstellung
+ * von showToast wurden mit Unterstützung von Claude (Anthropic) erstellt,
+ * vom Team geprüft und angepasst (siehe KI-Log Nr. 17).
+ */
+
+/** Maskiert Text für die Ausgabe in HTML-Templates (Schutz vor XSS). */
+export function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Lässt nur absolute http(s)- und data:image-URLs zu, sonst Fallback. */
+export function safeUrl(value, fallback = '') {
+  const url = String(value ?? '').trim();
+  if (!url) return fallback;
+  if (/^data:image\//i.test(url)) return url;
+  try {
+    const parsed = new URL(url); // ohne Basis: relative/kaputte Werte werfen -> Fallback
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/** Liefert einen sicheren Wert für style="background-image: …". */
+export function cssUrl(value, fallback = '') {
+  const url = safeUrl(value, fallback);
+  if (!url) return 'none';
+  return `url("${url.replace(/["'\\()\s]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'))}")`;
+}
+
 const u = (x) => 'data:image/svg+xml,' + encodeURIComponent(x);
 
 export function art(c, s = 0) {
@@ -45,11 +82,11 @@ export function paint() {
   document.querySelectorAll('.media-placeholder').forEach((el) => {
     const category = el.dataset.art || (el.classList.contains('hero-banner') ? 'Festivals' : 'Konzerte');
     if (el.classList.contains('hero-banner')) {
-  el.style.backgroundImage =
-    'url("https://cdn.pixabay.com/photo/2016/10/29/09/50/abstract-1780253_1280.png")';
-} else {
-  el.style.backgroundImage = `url("${art(category, +el.dataset.seed || 0)}")`;
-}
+      el.style.backgroundImage =
+        'url("https://cdn.pixabay.com/photo/2016/10/29/09/50/abstract-1780253_1280.png")';
+    } else {
+      el.style.backgroundImage = `url("${art(category, +el.dataset.seed || 0)}")`;
+    }
   });
 }
 
@@ -105,9 +142,15 @@ export function showToast(message, type = 'success') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast--${type}`;
-  
+
   const icon = type === 'success' ? '✓' : '✕';
-  toast.innerHTML = `<span style="font-size: 14px;">${icon}</span><span>${message}</span>`;
+  const iconEl = document.createElement('span');
+  iconEl.style.fontSize = '14px';
+  iconEl.textContent = icon;
+  const textEl = document.createElement('span');
+  textEl.textContent = String(message ?? '');
+  toast.append(iconEl, textEl);
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
   container.appendChild(toast);
 
   requestAnimationFrame(() => {

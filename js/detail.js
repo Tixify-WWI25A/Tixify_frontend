@@ -1,35 +1,28 @@
-import { apiRequest, setupNavigation, updateCartBadge } from './api.js';
-import { art, showToast } from '../js/common.js';
+/*
+ * Tixify MPA – Eventdetail: Infos, Karte, Menge, Warenkorb.
+ * KI-Kennzeichnung: Toasts statt alert(), sichere Bild-URL (cssUrl), Karten-Popup
+ * als Text statt HTML und isLoggedIn() wurden mit Unterstützung von Claude (Anthropic)
+ * ergänzt und vom Team geprüft (KI-Log Nr. 17).
+ */
+import { apiRequest, setupNavigation, updateCartBadge, isLoggedIn } from './api.js';
+import { art, showToast, cssUrl } from './common.js';
 
 let currentEvent = null;
 let currentQuantity = 1;
 
 function checkAuthStatus() {
-  const token = localStorage.getItem('token') || localStorage.getItem('tixify_token');
-  const userRaw = localStorage.getItem('user');
-  
-  let isLoggedIn = Boolean(token && token !== 'null' && token !== 'undefined');
-  
-  if (!isLoggedIn && userRaw && userRaw !== 'null' && userRaw !== 'undefined') {
-    try {
-      const parsed = JSON.parse(userRaw);
-      isLoggedIn = Boolean(parsed && Object.keys(parsed).length > 0);
-    } catch {
-      isLoggedIn = false;
-    }
-  }
-
-  const navText = document.querySelector('.nav-menu')?.textContent.toLowerCase() || '';
-  if (navText.includes('anmelden') || navText.includes('login / registrieren')) {
-    isLoggedIn = false;
-  }
-
+  const loggedIn = isLoggedIn();
   const loginHint = document.getElementById('login-hint');
-  if (loginHint) {
-    loginHint.style.display = isLoggedIn ? 'none' : 'block';
-  }
+  if (loginHint) loginHint.style.display = loggedIn ? 'none' : 'block';
+  return loggedIn;
+}
 
-  return isLoggedIn;
+function showLoadError(message) {
+  showToast(message, 'error');
+  const title = document.getElementById('event-title');
+  if (title) title.textContent = message;
+  document.getElementById('btn-add-cart')?.setAttribute('disabled', '');
+  document.getElementById('btn-checkout')?.setAttribute('disabled', '');
 }
 
 async function loadEventDetails() {
@@ -37,18 +30,20 @@ async function loadEventDetails() {
   const eventId = urlParams.get('id');
 
   if (!eventId) {
-    alert('Keine Event-ID angegeben!');
-    window.location.href = 'index.html';
+    showLoadError('Keine Event-ID angegeben.');
+    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
     return;
   }
 
   try {
-    currentEvent = await apiRequest(`/events/${eventId}`, { method: 'GET' });
+    currentEvent = await apiRequest(`/events/${encodeURIComponent(eventId)}`, { method: 'GET' });
 
-    if (!currentEvent) {
-      alert('Event nicht gefunden!');
+    if (!currentEvent || !currentEvent.event_id) {
+      showLoadError('Event nicht gefunden.');
       return;
     }
+
+    document.title = `Tixify – ${currentEvent.title}`;
 
     document.getElementById('event-title').textContent = currentEvent.title;
 
@@ -68,13 +63,13 @@ async function loadEventDetails() {
     if (catBadge) {
       const cat = currentEvent.category || 'Konzerte';
       catBadge.textContent = cat;
-      catBadge.className = `badge badge--${cat.toLowerCase().trim()}`;
+      catBadge.className = `badge badge--${String(cat).toLowerCase().trim().replace(/[^a-z0-9äöüß-]/g, '')}`;
     }
 
     const artContainer = document.getElementById('event-art');
     if (artContainer) {
-      const coverUrl = currentEvent.logo_url || art(currentEvent.category || 'Konzerte', currentEvent.event_id);
-      artContainer.style.backgroundImage = `url('${coverUrl}')`;
+      const fallback = art(currentEvent.category || 'Konzerte', currentEvent.event_id);
+      artContainer.style.backgroundImage = cssUrl(currentEvent.logo_url, fallback);
     }
 
     const descElem = document.getElementById('event-description');
@@ -94,8 +89,8 @@ async function loadEventDetails() {
       if (checkoutBtn) {
         checkoutBtn.disabled = true;
         checkoutBtn.textContent = 'Ausverkauft';
-        checkoutBtn.style.opacity = '0.5';
       }
+      document.getElementById('btn-add-cart')?.setAttribute('disabled', '');
     }
 
     renderEventMapAndAddress(currentEvent);
@@ -103,7 +98,7 @@ async function loadEventDetails() {
     checkAuthStatus();
   } catch (err) {
     console.error('Fehler beim Laden des Events:', err);
-    alert('Event konnte nicht geladen werden.');
+    showLoadError(err.status === 404 ? 'Event nicht gefunden.' : 'Event konnte nicht geladen werden.');
   }
 }
 
@@ -111,7 +106,7 @@ function renderEventMapAndAddress(eventData) {
   const addressTextEl = document.getElementById('event-address-text');
   const mapContainer = document.getElementById('event-map');
 
-  if (!mapContainer) return;
+  if (!mapContainer || typeof L === 'undefined') return;
 
   const fullAddress = eventData.address || eventData.location || 'Keine Adresse angegeben';
   if (addressTextEl) {
@@ -137,9 +132,10 @@ function renderEventMapAndAddress(eventData) {
   }).addTo(map);
 
   if (hasValidCoords) {
-    L.marker(position).addTo(map)
-      .bindPopup(eventData.title || 'Veranstaltungsort')
-      .openPopup();
+    // Popup als Textknoten: Leaflet würde einen String als HTML einsetzen (XSS)
+    const popup = document.createElement('span');
+    popup.textContent = eventData.title || 'Veranstaltungsort';
+    L.marker(position).addTo(map).bindPopup(popup).openPopup();
   }
 }
 
@@ -212,6 +208,7 @@ function initCartAndCheckoutButtons() {
       const success = await addItemToCart();
       if (success) {
         showToast(`${currentQuantity}x Ticket(s) in den Warenkorb gelegt!`, 'success');
+        updateCartBadge();
         addCartBtn.textContent = '✓ Im Warenkorb';
         setTimeout(() => {
           addCartBtn.disabled = false;

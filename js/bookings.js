@@ -1,79 +1,95 @@
-import { apiRequest, setupNavigation } from './api.js';
+/*
+ * Tixify MPA – Meine Buchungen und Tickets.
+ * KI-Kennzeichnung: Escaping der Tabellen-/Ticketvorlagen, lokale QR-Erzeugung
+ * (statt externem QR-Dienst) und data-label für die mobile Tabelle wurden mit
+ * Unterstützung von Claude (Anthropic) erstellt und vom Team geprüft (KI-Log Nr. 17).
+ * QR-Bibliothek: qrcode-generator 1.4.4, Kazuhiko Arase, MIT-Lizenz (js/vendor/qrcode.js).
+ */
+import { apiRequest, setupNavigation, getToken } from './api.js';
+import { escapeHtml } from './common.js';
 
 let userOrders = [];
 
+const euro = (value) => `${(parseFloat(value) || 0).toFixed(2).replace('.', ',')} €`;
+
+/** QR-Code als SVG lokal im Browser erzeugen – der Ticketcode verlässt das Gerät nicht. */
+function qrSvg(text) {
+  if (typeof window.qrcode !== 'function') return '';
+  const qr = window.qrcode(0, 'M');
+  qr.addData(String(text));
+  qr.make();
+  return qr.createSvgTag({ cellSize: 3, margin: 2, scalable: true, alt: `QR-Code ${text}` });
+}
+
 async function loadBookings() {
   const tbody = document.querySelector('.data-table tbody');
+  if (!tbody) return;
+
+  if (!getToken()) {
+    tbody.innerHTML = '<tr><td colspan="7">Bitte <a href="login.html">melde dich an</a>, um deine Buchungen zu sehen.</td></tr>';
+    return;
+  }
 
   try {
     userOrders = await apiRequest('/orders/my-bookings');
 
     if (!userOrders || userOrders.length === 0) {
-      if (tbody) tbody.innerHTML = '<tr><td colspan="7">Noch keine Buchungen vorhanden.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7">Noch keine Buchungen vorhanden.</td></tr>';
       return;
     }
 
-    if (tbody) {
-      tbody.innerHTML = userOrders.map((o, index) => {
-        const firstTicket = o.tickets[0] || {};
-        const dateStr = new Date(o.created_at).toLocaleDateString('de-DE');
-        const totalFormatted = parseFloat(o.total_amount).toFixed(2).replace('.', ',') + ' €';
+    tbody.innerHTML = userOrders.map((o, index) => {
+      const tickets = o.tickets || [];
+      const firstTicket = tickets[0] || {};
+      const dateStr = new Date(o.created_at).toLocaleDateString('de-DE');
 
-        return `
-          <tr>
-            <td>#${o.order_id}</td>
-            <td>${firstTicket.title || 'Event-Ticket'}</td>
-            <td>${dateStr}</td>
-            <td>${o.tickets.length}</td>
-            <td>${totalFormatted}</td>
-            <td class="order-status--paid">${o.status}</td>
-            <td>
-              <button class="button button--outline button--small view-tickets-btn" data-index="${index}">
-                Tickets anzeigen
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      return `
+        <tr>
+          <td data-label="Nr.">#${escapeHtml(o.order_id)}</td>
+          <td data-label="Event">${escapeHtml(firstTicket.title || 'Event-Ticket')}</td>
+          <td data-label="Datum">${dateStr}</td>
+          <td data-label="Tickets">${tickets.length}</td>
+          <td data-label="Gesamt">${euro(o.total_amount)}</td>
+          <td data-label="Status" class="order-status--paid">${escapeHtml(o.status)}</td>
+          <td data-label="">
+            <button class="button button--outline button--small view-tickets-btn" data-index="${index}">
+              Tickets anzeigen
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
-      document.querySelectorAll('.view-tickets-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const orderIdx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
-          renderTicketList(userOrders[orderIdx]);
-        });
+    document.querySelectorAll('.view-tickets-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const orderIdx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+        renderTicketList(userOrders[orderIdx]);
+        document.getElementById('tickets-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
-    }
+    });
 
-    if (userOrders.length > 0 && userOrders[0].tickets?.length > 0) {
+    if (userOrders[0].tickets?.length > 0) {
       renderTicketList(userOrders[0]);
     }
-
   } catch (err) {
     console.error('Fehler beim Laden der Buchungen:', err);
-    if (tbody) tbody.innerHTML = `<tr><td colspan="7">Fehler: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7">Fehler: ${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
 function renderTicketList(order) {
-  const container = document.getElementById('tickets-container') || document.querySelector('.ticket-item')?.parentElement;
+  const container = document.getElementById('tickets-container');
   if (!container || !order || !order.tickets) return;
 
-  container.innerHTML = order.tickets.map((t, idx) => {
-    // Generiert einen echten, scannbaren QR-Code direkt aus dem eindeutigen Ticket-Code
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=4&data=${encodeURIComponent(t.ticket_code)}`;
-
-    return `
-      <div class="ticket-item" style="margin-bottom: 10px; display: flex; align-items: center; background: #fff; border: 1px dashed var(--color-accent, #6B4FC4); border-radius: 8px; overflow: hidden;">
-        <div style="width: 90px; height: 90px; flex-shrink: 0; background: #fff; display: flex; align-items: center; justify-content: center; padding: 6px; border-right: 1px dashed var(--color-accent, #6B4FC4);">
-          <img src="${qrUrl}" alt="QR-Code ${t.ticket_code}" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
-        </div>
-        <div class="ticket-item__details" style="padding: 12px 16px;">
-          <b>Ticket ${idx + 1} von ${order.tickets.length}: ${t.ticket_code}</b><br>
-          <span class="text-muted" style="font-size: 13px;">${t.title} · Status: Gültig · Einzelpreis: ${parseFloat(t.price).toFixed(2).replace('.', ',')} €</span>
-        </div>
+  container.innerHTML = order.tickets.map((t, idx) => `
+    <div class="ticket-item">
+      <div class="ticket-item__qr">${qrSvg(t.ticket_code) || escapeHtml(t.ticket_code)}</div>
+      <div class="ticket-item__details">
+        <b>Ticket ${idx + 1} von ${order.tickets.length}: ${escapeHtml(t.ticket_code)}</b><br>
+        <span class="text-muted">${escapeHtml(t.title)} · Status: Gültig · Einzelpreis: ${euro(t.price)}</span>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

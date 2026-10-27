@@ -1,7 +1,19 @@
-import { apiRequest } from "./api.js";
+/*
+ * Tixify MPA – Login und Registrierung.
+ * KI-Kennzeichnung: Sperre gegen Doppelklick beim Absenden und setupNavigation
+ * (mobiles Menü) wurden mit Unterstützung von Claude (Anthropic) ergänzt (KI-Log Nr. 17).
+ */
+import { apiRequest, setupNavigation } from "./api.js";
 import { showToast } from "./common.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupNavigation();
+
+  const lock = (form, busy) => {
+    const btn = form.querySelector("button[type=submit]");
+    if (btn) btn.disabled = busy;
+  };
+
   const registerForm = document.getElementById("register-form");
 
   if (registerForm) {
@@ -12,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("reg-email").value.trim();
       const password = document.getElementById("reg-password").value;
 
+      lock(registerForm, true);
       try {
         const res = await apiRequest("/auth/register", {
           method: "POST",
@@ -25,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showToast(
           res.message ||
-            "Konto erfolgreich erstellt! Du kannst dich jetzt anmelden.",
+          "Konto erfolgreich erstellt! Du kannst dich jetzt anmelden.",
           "success"
         );
         registerForm.reset();
@@ -35,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         console.error("Fehler bei Registrierung:", err);
         showToast(err.message || "Registrierung fehlgeschlagen.", "error");
+      } finally {
+        lock(registerForm, false);
       }
     });
   }
@@ -48,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("login-email").value.trim();
       const password = document.getElementById("login-password").value;
 
+      lock(loginForm, true);
       try {
         const res = await apiRequest("/auth/login", {
           method: "POST",
@@ -73,10 +89,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }, 1200);
         } else {
           showToast("Login fehlgeschlagen: Kein Token erhalten.", "error");
+          lock(loginForm, false);
         }
       } catch (err) {
         console.error("Fehler beim Login:", err);
         showToast(err.message || "Anmeldung fehlgeschlagen. Bitte Daten prüfen.", "error");
+        lock(loginForm, false);
       }
     });
   }
