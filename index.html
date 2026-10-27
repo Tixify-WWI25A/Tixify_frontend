@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
   <title>Tixify – Events</title>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
@@ -32,13 +30,13 @@
       </nav>
     </div>
 
-    <div class="category-bar">
-      <a class="category-bar__link category-bar__link--active">Alle</a>
-      <a class="category-bar__link">Konzerte</a>
-      <a class="category-bar__link">Festivals</a>
-      <a class="category-bar__link">Sport</a>
-      <a class="category-bar__link">Theater</a>
-      <a class="category-bar__link">Comedy</a>
+    <div class="category-bar" role="group" aria-label="Kategorie">
+      <button type="button" class="category-bar__link category-bar__link--active" aria-pressed="true">Alle</button>
+      <button type="button" class="category-bar__link" aria-pressed="false">Konzerte</button>
+      <button type="button" class="category-bar__link" aria-pressed="false">Festivals</button>
+      <button type="button" class="category-bar__link" aria-pressed="false">Sport</button>
+      <button type="button" class="category-bar__link" aria-pressed="false">Theater</button>
+      <button type="button" class="category-bar__link" aria-pressed="false">Comedy</button>
     </div>
   </header>
 

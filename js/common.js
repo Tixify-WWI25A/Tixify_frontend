@@ -82,8 +82,8 @@ export function paint() {
   document.querySelectorAll('.media-placeholder').forEach((el) => {
     const category = el.dataset.art || (el.classList.contains('hero-banner') ? 'Festivals' : 'Konzerte');
     if (el.classList.contains('hero-banner')) {
-      el.style.backgroundImage =
-        'url("https://cdn.pixabay.com/photo/2016/10/29/09/50/abstract-1780253_1280.png")';
+      // Startbild liegt lokal (img/hero.png); fehlt es, sieht man das generierte Bild darunter
+      el.style.backgroundImage = `url("img/hero.png"), url("${art(category, 0)}")`;
     } else {
       el.style.backgroundImage = `url("${art(category, +el.dataset.seed || 0)}")`;
     }

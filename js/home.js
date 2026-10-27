@@ -1,6 +1,7 @@
 /*
  * Tixify MPA – Startseite: Eventliste, Filter, Sortierung, Seiten.
- * KI-Kennzeichnung: Das Escaping der Kartenvorlage (escapeHtml/cssUrl) wurde mit
+ * KI-Kennzeichnung: Das Escaping der Kartenvorlage (escapeHtml/cssUrl) und die
+ * Kategorie-Leiste als Buttons (setActiveTopCategory) wurden mit
  * Unterstützung von Claude (Anthropic) ergänzt und vom Team geprüft (KI-Log Nr. 17).
  */
 import { apiRequest, setupNavigation } from "./api.js";
@@ -12,6 +13,14 @@ let maxEventPrice = 150;
 let currentPage = 1;
 const EVENTS_PER_PAGE = 6; // 6 Events pro Seite (2 Zeilen à 3 Karten)
 let currentFilteredEvents = [];
+
+function setActiveTopCategory(active) {
+  document.querySelectorAll('.category-bar__link').forEach((l) => {
+    const isActive = l === active;
+    l.classList.toggle('category-bar__link--active', isActive);
+    l.setAttribute('aria-pressed', String(isActive));
+  });
+}
 
 async function loadEvents() {
   const listContainer = document.getElementById("events-container");
@@ -325,8 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Obere Kategorie-Leiste
   document.querySelectorAll('.category-bar__link').forEach(link => {
     link.addEventListener('click', () => {
-      document.querySelectorAll('.category-bar__link').forEach(l => l.classList.remove('category-bar__link--active'));
-      link.classList.add('category-bar__link--active');
+      setActiveTopCategory(link);
       activeTopCategory = link.textContent.trim();
       applyFilters();
     });
@@ -360,9 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Top-Leiste auf 'Alle'
-    document.querySelectorAll('.category-bar__link').forEach(l => l.classList.remove('category-bar__link--active'));
-    const allLink = document.querySelector('.category-bar__link');
-    if (allLink) allLink.classList.add('category-bar__link--active');
+    setActiveTopCategory(document.querySelector('.category-bar__link'));
     activeTopCategory = 'Alle';
 
     applyFilters();

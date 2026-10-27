@@ -1,3 +1,37 @@
+/* Schrift lokal statt von Google Fonts: keine IP-Übertragung an Google (vgl. LG München I, 3 O 17493/20).
+   Instrument Sans, SIL Open Font License 1.1 (fonts/OFL-LICENSE.txt), Dateien aus @fontsource/instrument-sans 5.1.0. */
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/instrument-sans-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/instrument-sans-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/instrument-sans-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/instrument-sans-latin-700-normal.woff2") format("woff2");
+}
+
 :root {
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
@@ -135,6 +169,9 @@ textarea {
 }
 
 .category-bar__link {
+  background: none;
+  border: 0;
+  font: inherit;
   border-radius: 0;
   white-space: nowrap;
   padding: 10px 14px;
