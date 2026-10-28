@@ -83,6 +83,13 @@ async function loadEventDetails() {
       stockElem.textContent = `${stock} Tickets`;
     }
 
+    // Sicherstellen, dass die aktuelle Menge das Limit (max. 5 oder aktueller Bestand) nicht überschreitet
+    const maxAllowed = Math.min(stock, 5);
+    if (currentQuantity > maxAllowed) {
+      currentQuantity = Math.max(1, maxAllowed);
+      updatePriceDisplay();
+    }
+
     const checkoutBtn = document.getElementById('btn-checkout');
     if (stock <= 0) {
       if (stockElem) stockElem.textContent = 'Ausverkauft';
@@ -132,7 +139,6 @@ function renderEventMapAndAddress(eventData) {
   }).addTo(map);
 
   if (hasValidCoords) {
-    // Popup als Textknoten: Leaflet würde einen String als HTML einsetzen (XSS)
     const popup = document.createElement('span');
     popup.textContent = eventData.title || 'Veranstaltungsort';
     L.marker(position).addTo(map).bindPopup(popup).openPopup();
@@ -168,9 +174,17 @@ function initQuantityControls() {
 
   btnIncrease?.addEventListener('click', () => {
     const stock = currentEvent ? (currentEvent.event_stock ?? currentEvent.stock ?? 999) : 999;
-    if (currentQuantity < stock) {
+    const maxAllowed = Math.min(stock, 5);
+
+    if (currentQuantity < maxAllowed) {
       currentQuantity++;
       updatePriceDisplay();
+    } else {
+      if (stock < 5) {
+        showToast(`Es sind maximal nur noch ${stock} Tickets verfügbar.`, 'error');
+      } else {
+        showToast('Du kannst maximal 5 Tickets auf einmal auswählen.', 'error');
+      }
     }
   });
 }
