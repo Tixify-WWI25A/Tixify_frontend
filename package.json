@@ -1,0 +1,11 @@
+{
+  "name": "tixify-frontend-mpa",
+  "private": true,
+  "description": "Tixify MPA – statische Seiten; npm nur für den NFA-Test (Playwright)",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0"
+  }
+}
