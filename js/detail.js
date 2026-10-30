@@ -9,6 +9,7 @@ import { art, showToast, cssUrl } from './common.js';
 
 let currentEvent = null;
 let currentQuantity = 1;
+let maxAllowedTickets = 5; // Dynamisches Limit (Max. 5 gesamt pro User minus bereits gekaufte Tickets)
 
 function checkAuthStatus() {
   const loggedIn = isLoggedIn();
@@ -44,7 +45,6 @@ async function loadEventDetails() {
     }
 
     document.title = `Tixify – ${currentEvent.title}`;
-
     document.getElementById('event-title').textContent = currentEvent.title;
 
     let formattedDate = 'Datum unbestimmt';
@@ -83,21 +83,84 @@ async function loadEventDetails() {
       stockElem.textContent = `${stock} Tickets`;
     }
 
-    // Sicherstellen, dass die aktuelle Menge das Limit (max. 5 oder aktueller Bestand) nicht überschreitet
-    const maxAllowed = Math.min(stock, 5);
-    if (currentQuantity > maxAllowed) {
-      currentQuantity = Math.max(1, maxAllowed);
-      updatePriceDisplay();
+    // --- ROBUSTE PRÜFUNG & DEBUGGING: Bereits gekaufte Tickets ermitteln ---
+    let alreadyBooked = 0;
+    if (isLoggedIn()) {
+      try {
+        const bookings = await apiRequest('/orders/my-bookings', { method: 'GET' });
+        console.log('=== BUCHUNGEN API RESPONSE ===', bookings);
+        console.log('=== CURRENT EVENT ID ===', eventId);
+
+        if (Array.isArray(bookings) && bookings.length > 0) {
+          console.log('=== ERSTE BUCHUNG DETAILS ===', bookings[0]);
+          if (Array.isArray(bookings[0].tickets) && bookings[0].tickets.length > 0) {
+            console.log('=== ERSTES TICKET OBJEKT ===', bookings[0].tickets[0]);
+          }
+
+          for (const order of bookings) {
+            if (Array.isArray(order.tickets)) {
+              for (const ticket of order.tickets) {
+                // Alle denkbaren Felder für die Event-ID im Ticket prüfen
+                const tEventId = ticket.event_id ?? ticket.eventId ?? ticket.eventID ?? ticket.id;
+                if (tEventId && parseInt(tEventId, 10) === parseInt(eventId, 10)) {
+                  alreadyBooked++;
+                }
+              }
+            } else if (Array.isArray(order.items)) {
+              for (const item of order.items) {
+                const itemEventId = item.event_id ?? item.eventId ?? item.eventID;
+                if (itemEventId && parseInt(itemEventId, 10) === parseInt(eventId, 10)) {
+                  const itemQty = parseInt(item.quantity ?? item.ticket_count ?? 1, 10);
+                  alreadyBooked += itemQty;
+                }
+              }
+            } else {
+              const orderEventId = order.event_id ?? order.eventId ?? order.eventID;
+              if (orderEventId && parseInt(orderEventId, 10) === parseInt(eventId, 10)) {
+                const qty = parseInt(order.quantity ?? order.ticket_count ?? 1, 10);
+                alreadyBooked += qty;
+              }
+            }
+          }
+        }
+        console.log('=== BERECHNET ALREADY BOOKED ===', alreadyBooked);
+      } catch (err) {
+        console.error('Fehler beim Prüfen der Buchungshistorie:', err);
+      }
     }
 
+    // Berechne, wie viele Tickets der User noch kaufen darf (Gesamtlimit 5 minus bereits gekaufte)
+    const remainingAllowed = Math.max(0, 5 - alreadyBooked);
+    maxAllowedTickets = Math.min(stock, remainingAllowed);
+
+    const addCartBtn = document.getElementById('btn-add-cart');
     const checkoutBtn = document.getElementById('btn-checkout');
+
     if (stock <= 0) {
       if (stockElem) stockElem.textContent = 'Ausverkauft';
       if (checkoutBtn) {
         checkoutBtn.disabled = true;
         checkoutBtn.textContent = 'Ausverkauft';
       }
-      document.getElementById('btn-add-cart')?.setAttribute('disabled', '');
+      addCartBtn?.setAttribute('disabled', '');
+    } else if (alreadyBooked >= 5) {
+      if (stockElem) stockElem.textContent = 'Limit von 5 Tickets bereits erreicht';
+      if (checkoutBtn) {
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = 'Limit erreicht';
+      }
+      addCartBtn?.setAttribute('disabled', '');
+      showToast('Du hast bereits die maximale Anzahl von 5 Tickets für dieses Event gekauft.', 'error');
+    } else if (maxAllowedTickets <= 0) {
+      if (checkoutBtn) checkoutBtn.disabled = true;
+      addCartBtn?.setAttribute('disabled', '');
+    }
+
+    // Aktuelle Menge hart auf das neue erlaubte Maximum deckeln (z.B. max. 2 bei schon 3 gekauften)
+    if (currentQuantity > maxAllowedTickets && maxAllowedTickets > 0) {
+      currentQuantity = maxAllowedTickets;
+    } else if (maxAllowedTickets <= 0) {
+      currentQuantity = 1;
     }
 
     renderEventMapAndAddress(currentEvent);
@@ -173,17 +236,14 @@ function initQuantityControls() {
   });
 
   btnIncrease?.addEventListener('click', () => {
-    const stock = currentEvent ? (currentEvent.event_stock ?? currentEvent.stock ?? 999) : 999;
-    const maxAllowed = Math.min(stock, 5);
-
-    if (currentQuantity < maxAllowed) {
+    if (currentQuantity < maxAllowedTickets) {
       currentQuantity++;
       updatePriceDisplay();
     } else {
-      if (stock < 5) {
-        showToast(`Es sind maximal nur noch ${stock} Tickets verfügbar.`, 'error');
+      if (maxAllowedTickets <= 0) {
+        showToast('Du hast bereits die maximale Anzahl an Tickets für dieses Event erreicht.', 'error');
       } else {
-        showToast('Du kannst maximal 5 Tickets auf einmal auswählen.', 'error');
+        showToast(`Du kannst maximal noch ${maxAllowedTickets} weitere Tickets für dieses Event auswählen (Gesamtlimit: 5).`, 'error');
       }
     }
   });
@@ -236,7 +296,7 @@ function initCartAndCheckoutButtons() {
       console.error(err);
       showToast(err.message || 'Fehler beim Hinzufügen', 'error');
       addCartBtn.disabled = false;
-      addCartBtn.textContent = '🛒 In den Warenkorb';
+      addCardBtn.textContent = '🛒 In den Warenkorb';
     }
   });
 
