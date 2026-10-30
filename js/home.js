@@ -1,10 +1,12 @@
+
 /*
  * Tixify MPA – Startseite: Eventliste, Filter, Sortierung, Seiten.
  * KI-Kennzeichnung: Das Escaping der Kartenvorlage (escapeHtml/cssUrl) und die
- * Kategorie-Leiste als Buttons (setActiveTopCategory) wurden mit
+ * Kategorie-Leiste als Buttons (setActiveTopCategory) und die Ladezeit-Messung
+ * für NFA US-05 (reportLoadTime) wurden mit
  * Unterstützung von Claude (Anthropic) ergänzt und vom Team geprüft (KI-Log Nr. 17).
  */
-import { apiRequest, setupNavigation } from "./api.js";
+import { apiRequest, setupNavigation, isAdmin } from "./api.js";
 import { art, escapeHtml, cssUrl } from "./common.js";
 
 let allEvents = [];
@@ -14,6 +16,7 @@ let currentPage = 1;
 const EVENTS_PER_PAGE = 6; // 6 Events pro Seite (2 Zeilen à 3 Karten)
 let currentFilteredEvents = [];
 
+/** Markiert eine Kategorie der oberen Leiste als aktiv (Klasse + aria-pressed). */
 function setActiveTopCategory(active) {
   document.querySelectorAll('.category-bar__link').forEach((l) => {
     const isActive = l === active;
@@ -22,11 +25,37 @@ function setActiveTopCategory(active) {
   });
 }
 
+/**
+ * NFA US-05: Eventliste in unter 1,5 s. Gemessen wird im Browser des Nutzers:
+ * vom Absenden der Anfrage bis die Liste angezeigt ist (Netz, gateway, catalog, Darstellung).
+ * Das Ergebnis steht in window.__tixifyNfa (für den automatischen Test) und neben der Überschrift.
+ */
+const NFA_LIMIT_MS = 1500;
+
+function reportLoadTime(apiMs, totalMs) {
+  window.__tixifyNfa = { apiMs: Math.round(apiMs), totalMs: Math.round(totalMs), limitMs: NFA_LIMIT_MS };
+  try {
+    performance.measure("tixify-events-loaded", "tixify-events-start");
+  } catch {
+    /* ältere Browser ohne User Timing */
+  }
+  console.info(`[NFA US-05] Eventliste: API ${Math.round(apiMs)} ms, angezeigt nach ${Math.round(totalMs)} ms (Grenze ${NFA_LIMIT_MS} ms)`);
+  const badge = document.getElementById("nfa-load-time");
+  if (badge && isAdmin()) {
+    badge.textContent = `geladen in ${(totalMs / 1000).toFixed(2).replace(".", ",")} s`;
+    badge.title = `NFA US-05: Grenze 1,5 s · davon Serverantwort ${Math.round(apiMs)} ms`;
+    badge.classList.toggle("nfa-badge--slow", totalMs >= NFA_LIMIT_MS);
+  }
+}
+
 async function loadEvents() {
   const listContainer = document.getElementById("events-container");
+  const t0 = performance.now();
+  try { performance.mark("tixify-events-start"); } catch { /* egal */ }
 
   try {
     allEvents = await apiRequest("/events");
+    const apiMs = performance.now() - t0;
     initPriceFilter(allEvents);
     populateLocationDropdown(allEvents);
 
@@ -41,6 +70,8 @@ async function loadEvents() {
     }
 
     applyFilters();
+    // Zeit erst nehmen, wenn der Browser die Liste wirklich gezeichnet hat
+    requestAnimationFrame(() => reportLoadTime(apiMs, performance.now() - t0));
 
     // Falls per URL gesucht wurde: Sanft zu den Events scrollen
     if (searchQuery) {
@@ -374,3 +405,4 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFilters();
   });
 });
+
