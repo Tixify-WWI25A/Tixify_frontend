@@ -8,7 +8,7 @@
  * Mit Claude (KI-Log Nr. 30, 05.11.) angepasst und vom Team getestet: Capture und Abbruch
  * über die dokumentierten Routen /orders/:id/capture und /orders/:id/cancel; ein Abbruch
  * im PayPal-Fenster gibt die reservierten Tickets sofort wieder frei.
-*/
+ */
 import { apiRequest, setupNavigation, getSession, updateCartBadge } from './api.js';
 import { art, showToast, escapeHtml, cssUrl } from './common.js';
 
@@ -271,21 +271,18 @@ function initPayPal() {
         showToast(err.message || 'Zahlung konnte nicht verarbeitet werden.', 'error');
       }
     },
-    onCancel: () => {
-     onCancel: async () => {
-    // Reservierte Tickets sofort freigeben, statt 15 Minuten auf den Ablauf zu warten
-    if (currentOrderId) {
-      try {
-        await apiRequest(`/orders/${encodeURIComponent(currentOrderId)}/cancel`, { method: 'POST' });
-      } catch {
-        // Fällt der Aufruf aus, gibt der catalog die Reservierung nach 15 Minuten selbst frei
+    onCancel: async () => {
+      // Reservierte Tickets sofort freigeben, statt 15 Minuten auf den Ablauf zu warten
+      if (currentOrderId) {
+        try {
+          await apiRequest(`/orders/${encodeURIComponent(currentOrderId)}/cancel`, { method: 'POST' });
+        } catch {
+          // Fällt der Aufruf aus, gibt der catalog die Reservierung nach 15 Minuten selbst frei
+        }
+        currentOrderId = null;
       }
-      currentOrderId = null;
-    }
-    showToast('Zahlung abgebrochen – dein Warenkorb ist noch da.', 'error');
-    }
-  },
-
+      showToast('Zahlung abgebrochen – dein Warenkorb ist noch da.', 'error');
+    },
     onError: (err) => {
       console.error('PayPal-Fehler:', err);
       showToast('Zahlung fehlgeschlagen. Bitte erneut versuchen.', 'error');
