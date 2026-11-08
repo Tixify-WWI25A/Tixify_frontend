@@ -1,7 +1,7 @@
 
 # Oberflächentests im echten Browser gegen das Live-System: NFA US-05 (Ladezeit, gegen die echte API),
 # US-07 mobil bei 375 px und Schutz vor Schadcode (beide mit festen Testdaten statt der echten API).
-# Läuft nach jedem Pages-Deploy, täglich und auf Knopfdruck. KI-Log Nr. 19 und 27.
+# Läuft nach jedem Pages-Deploy, täglich und auf Knopfdruck. KI-Log Nr. 52 und 63.
 name: Oberflächentests
  
 on:

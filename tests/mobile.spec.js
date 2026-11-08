@@ -1,6 +1,6 @@
 // US-07 (CR-01): Jede Kundenseite ist bei 375 px Breite ohne waagerechtes Scrollen bedienbar.
 // Prüft den Überlauf der Seite und die Mindestgröße der Bedienelemente (44 px, AK-07-2).
-// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 27).
+// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 63).
 const { test, expect } = require('@playwright/test');
 const { mockApi } = require('./helpers/mockApi');
 

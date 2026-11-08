@@ -2,7 +2,7 @@
  * Tixify MPA – API-Zugriff, Sitzung und Navigation.
  * KI-Kennzeichnung: getToken/getSession/clearSession, der Admin-Link auf die SPA
  * (nur für Admins) und das mobile Menü (Menü-Button) wurden mit Unterstützung
- * von Claude (Anthropic) erstellt, vom Team geprüft und angepasst (KI-Log Nr. 17).
+ * von Claude (Anthropic) erstellt, vom Team geprüft und angepasst (KI-Log Nr. 48).
  */
 const API_BASE_URL = 'https://tixify-c7a903638236.herokuapp.com/api';
 

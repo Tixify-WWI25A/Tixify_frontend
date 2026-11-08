@@ -2,7 +2,7 @@
  * Tixify MPA – Eventdetail: Infos, Karte, Menge, Warenkorb.
  * KI-Kennzeichnung: Toasts statt alert(), sichere Bild-URL (cssUrl), Karten-Popup
  * als Text statt HTML und isLoggedIn() wurden mit Unterstützung von Claude (Anthropic)
- * ergänzt und vom Team geprüft (KI-Log Nr. 17).
+ * ergänzt und vom Team geprüft (KI-Log Nr. 48).
  */
 import { apiRequest, setupNavigation, updateCartBadge, isLoggedIn } from './api.js';
 import { art, showToast, cssUrl } from './common.js';

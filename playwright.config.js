@@ -1,4 +1,4 @@
-// Playwright-Konfiguration für den NFA-Test (KI-Log Nr. 19)
+// Playwright-Konfiguration für den NFA-Test (KI-Log Nr. 52)
 const { defineConfig } = require('@playwright/test');
 
 module.exports = defineConfig({

@@ -2,7 +2,7 @@
  * Tixify MPA – gemeinsame Hilfsfunktionen (Bilder, Suche, Toasts, Escaping).
  * KI-Kennzeichnung: escapeHtml, safeUrl, cssUrl und die textContent-Umstellung
  * von showToast wurden mit Unterstützung von Claude (Anthropic) erstellt,
- * vom Team geprüft und angepasst (siehe KI-Log Nr. 17).
+ * vom Team geprüft und angepasst (siehe KI-Log Nr. 48).
  */
 
 /** Maskiert Text für die Ausgabe in HTML-Templates (Schutz vor XSS). */

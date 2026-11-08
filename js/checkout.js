@@ -3,9 +3,9 @@
  * KI-Kennzeichnung: Überarbeitung von Aufbau und Darstellung (Fortschrittsanzeige,
  * Warenkorbliste, Übersicht mit Weiter-Button, mobile Summenleiste), Escaping der
  * Vorlagen und die PayPal-Ladeprüfung wurden mit Unterstützung von Claude (Anthropic)
- * erstellt und vom Team geprüft (KI-Log Nr. 17).
+ * erstellt und vom Team geprüft (KI-Log Nr. 48).
  * Unser Code: Ablauf createOrder (POST /orders → paypalOrderId) und onApprove (Capture).
- * Mit Claude (KI-Log Nr. 30, 05.11.) angepasst und vom Team getestet: Capture und Abbruch
+ * Mit Claude (KI-Log Nr. 68, 05.11.) angepasst und vom Team getestet: Capture und Abbruch
  * über die dokumentierten Routen /orders/:id/capture und /orders/:id/cancel; ein Abbruch
  * im PayPal-Fenster gibt die reservierten Tickets sofort wieder frei.
  */

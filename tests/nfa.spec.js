@@ -1,7 +1,7 @@
 
 // NFA US-05: Die Eventliste ist im Browser in unter 1,5 Sekunden sichtbar.
 // Gemessen gegen das LIVE-System (GitHub Pages → gateway → catalog auf Heroku), Ende zu Ende.
-// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt, vom Team geprüft (KI-Log Nr. 19).
+// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt, vom Team geprüft (KI-Log Nr. 52).
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.MPA_URL || 'https://tixify-wwi25a.github.io/tixify-frontend-mpa/';

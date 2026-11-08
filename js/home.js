@@ -4,7 +4,7 @@
  * KI-Kennzeichnung: Das Escaping der Kartenvorlage (escapeHtml/cssUrl) und die
  * Kategorie-Leiste als Buttons (setActiveTopCategory) und die Ladezeit-Messung
  * für NFA US-05 (reportLoadTime) wurden mit
- * Unterstützung von Claude (Anthropic) ergänzt und vom Team geprüft (KI-Log Nr. 17).
+ * Unterstützung von Claude (Anthropic) ergänzt und vom Team geprüft (KI-Log Nr. 48).
  */
 import { apiRequest, setupNavigation, isAdmin } from "./api.js";
 import { art, escapeHtml, cssUrl } from "./common.js";

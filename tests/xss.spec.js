@@ -1,6 +1,6 @@
-// Sicherheit (US-06, KI-Log Nr. 17): Daten aus der API werden als Text angezeigt, nie als HTML ausgeführt.
+// Sicherheit (US-06, KI-Log Nr. 48): Daten aus der API werden als Text angezeigt, nie als HTML ausgeführt.
 // Ein Veranstaltungstitel mit Schadcode darf auf keiner Seite Skript ausführen.
-// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 27).
+// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 63).
 const { test, expect } = require('@playwright/test');
 const { mockApi } = require('./helpers/mockApi');
 

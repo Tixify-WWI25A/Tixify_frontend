@@ -2,7 +2,7 @@
  * Tixify MPA – Meine Buchungen und Tickets.
  * KI-Kennzeichnung: Escaping der Tabellen-/Ticketvorlagen, lokale QR-Erzeugung
  * (statt externem QR-Dienst) und data-label für die mobile Tabelle wurden mit
- * Unterstützung von Claude (Anthropic) erstellt und vom Team geprüft (KI-Log Nr. 17).
+ * Unterstützung von Claude (Anthropic) erstellt und vom Team geprüft (KI-Log Nr. 48).
  * QR-Bibliothek: qrcode-generator 1.4.4, Kazuhiko Arase, MIT-Lizenz (js/vendor/qrcode.js).
  */
 import { apiRequest, setupNavigation, getToken } from './api.js';

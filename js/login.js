@@ -1,7 +1,7 @@
 /*
  * Tixify MPA – Login und Registrierung.
  * KI-Kennzeichnung: Sperre gegen Doppelklick beim Absenden und setupNavigation
- * (mobiles Menü) wurden mit Unterstützung von Claude (Anthropic) ergänzt (KI-Log Nr. 17).
+ * (mobiles Menü) wurden mit Unterstützung von Claude (Anthropic) ergänzt (KI-Log Nr. 48).
  */
 import { apiRequest, setupNavigation } from "./api.js";
 import { showToast } from "./common.js";

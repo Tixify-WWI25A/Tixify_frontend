@@ -1001,7 +1001,7 @@ h3 {
 /* =====================================================================
    Ergänzungen Sprint 4: Kasse, Detail, Tabellen, Dark Mode, Mobil
    KI-Kennzeichnung: Dieser Abschnitt wurde mit Unterstützung von Claude
-   (Anthropic) erstellt, vom Team geprüft und angepasst (KI-Log Nr. 17).
+   (Anthropic) erstellt, vom Team geprüft und angepasst (KI-Log Nr. 48).
    ===================================================================== */
 
 :root {
@@ -1701,7 +1701,7 @@ h3 {
 }
 
 /* ---------- Kasse, Fassung 2 (Fortschritt, Warenkorbliste, Übersicht) ----------
-   KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 17) */
+   KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 48) */
 .checkout-title {
   margin-bottom: 14px;
 }
@@ -2124,7 +2124,7 @@ h3 {
   }
 }
 
-/* NFA US-05: gemessene Ladezeit neben der Überschrift (KI-Log Nr. 19) */
+/* NFA US-05: gemessene Ladezeit neben der Überschrift (KI-Log Nr. 52) */
 .catalog-header__title {
   display: flex;
   align-items: baseline;

@@ -1,6 +1,6 @@
 // Testhilfe: ersetzt die Antworten des Backends durch feste Testdaten, damit die
 // Oberflächentests unabhängig vom Live-System und von dessen Daten laufen.
-// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 27).
+// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 63).
 
 // Titel mit Schadcode: würde ihn eine Seite als HTML einfügen, setzt er window.__xss.
 const XSS_TITLE = '<img src=x onerror="window.__xss=1">Konzert <script>window.__xss=1</script>';

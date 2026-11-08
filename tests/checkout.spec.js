@@ -1,6 +1,6 @@
 // Kauf mit PayPal (UC 1): Die Kasse nutzt die dokumentierten Routen für Bezahlen und Abbruch.
 // PayPal selbst wird durch eine kleine Attrappe ersetzt, die die Rückrufe des SDK auslöst.
-// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 30).
+// KI-Kennzeichnung: mit Unterstützung von Claude (Anthropic) erstellt (KI-Log Nr. 68).
 const { test, expect } = require('@playwright/test');
 const { mockApi } = require('./helpers/mockApi');
 
