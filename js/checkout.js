@@ -5,6 +5,9 @@
  * Vorlagen und die PayPal-Ladeprüfung wurden mit Unterstützung von Claude (Anthropic)
  * erstellt und vom Team geprüft (KI-Log Nr. 17).
  * Unser Code: Ablauf createOrder (POST /orders → paypalOrderId) und onApprove (Capture).
+ * Mit Claude (KI-Log Nr. 30, 05.11.) angepasst und vom Team getestet: Capture und Abbruch
+ * über die dokumentierten Routen /orders/:id/capture und /orders/:id/cancel; ein Abbruch
+ * im PayPal-Fenster gibt die reservierten Tickets sofort wieder frei.
  */
 import { apiRequest, setupNavigation, getSession, updateCartBadge } from './api.js';
 import { art, showToast, escapeHtml, cssUrl } from './common.js';
@@ -238,12 +241,14 @@ function initPayPal() {
   }
 
   container.innerHTML = '';
+  let currentOrderId = null; // Bestellung, die createOrder angelegt hat (für Capture und Abbruch)
 
   window.paypal.Buttons({
     style: { layout: 'vertical', shape: 'rect', label: 'pay' },
     createOrder: async () => {
       try {
         const res = await apiRequest('/orders', { method: 'POST' });
+        currentOrderId = res.orderId;
         return res.paypalOrderId;
       } catch (err) {
         showToast(err.message || 'PayPal-Bestellung konnte nicht erstellt werden.', 'error');
@@ -252,7 +257,7 @@ function initPayPal() {
     },
     onApprove: async (data) => {
       try {
-        const res = await apiRequest('/orders/capture-paypal-order', {
+        const res = await apiRequest(`/orders/${encodeURIComponent(currentOrderId)}/capture`, {
           method: 'POST',
           body: JSON.stringify({ paypalOrderId: data.orderID })
         });
@@ -266,7 +271,16 @@ function initPayPal() {
         showToast(err.message || 'Zahlung konnte nicht verarbeitet werden.', 'error');
       }
     },
-    onCancel: () => {
+    onCancel: async () => {
+      // Reservierte Tickets sofort freigeben, statt 15 Minuten auf den Ablauf zu warten
+      if (currentOrderId) {
+        try {
+          await apiRequest(`/orders/${encodeURIComponent(currentOrderId)}/cancel`, { method: 'POST' });
+        } catch {
+          // Fällt der Aufruf aus, gibt der catalog die Reservierung nach 15 Minuten selbst frei
+        }
+        currentOrderId = null;
+      }
       showToast('Zahlung abgebrochen – dein Warenkorb ist noch da.', 'error');
     },
     onError: (err) => {

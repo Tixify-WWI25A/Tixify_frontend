@@ -1,7 +1,8 @@
 
-# NFA US-05: misst die Ladezeit der Eventliste im echten Browser gegen das Live-System.
-# Läuft nach jedem Pages-Deploy, täglich und auf Knopfdruck. KI-Log Nr. 19.
-name: NFA Ladezeit
+# Oberflächentests im echten Browser gegen das Live-System: NFA US-05 (Ladezeit, gegen die echte API),
+# US-07 mobil bei 375 px und Schutz vor Schadcode (beide mit festen Testdaten statt der echten API).
+# Läuft nach jedem Pages-Deploy, täglich und auf Knopfdruck. KI-Log Nr. 19 und 27.
+name: Oberflächentests
  
 on:
   workflow_run:
@@ -22,7 +23,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - name: Ladezeit messen (5 Aufrufe, Grenze 1,5 s)
+      - name: Ladezeit (Grenze 1,5 s), mobile Ansicht (375 px) und XSS-Schutz prüfen
         run: npx playwright test
         env:
           MPA_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
