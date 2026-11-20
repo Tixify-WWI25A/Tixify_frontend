@@ -70,4 +70,4 @@ npm test
 
 ## KI-Einsatz
 
-Die Erstfassungen der Seiten wurden mit Gemini erstellt (KI-Log Nr. 10, 13, 15, 16, 25), die Überarbeitung mit XSS-Schutz, mobiler Ansicht und neuer Kasse mit Claude (Nr. 48). Die Höchstmenge und „Meine Buchungen“ entstanden mit Gemini (Nr. 50), die Tests mit Claude (Nr. 52, 63, 68). Das Team hat jede Änderung im Browser getestet und bewertet. Jede Datei nennt im Kopfkommentar die zugehörigen Nummern im KI-Log der Projektdokumentation.
+Die Aufteilung des Wireframes in Seiten und die Detailseite entstanden mit Gemini (KI-Log Nr. 10, 25), Startseite, Anmeldung und Kasse in der ersten Fassung mit Claude (Nr. 13, 15, 16), die Überarbeitung mit XSS-Schutz, mobiler Ansicht und neuer Kasse mit Claude (Nr. 48). Die Höchstmenge und „Meine Buchungen“ entstanden mit Gemini (Nr. 50), die Tests und die Anbindung von Capture und Abbruch mit Claude (Nr. 52, 63, 70). Das Team hat jede Änderung im Browser getestet und bewertet. Jede Datei nennt im Kopfkommentar die zugehörigen Nummern im KI-Log der Projektdokumentation.
